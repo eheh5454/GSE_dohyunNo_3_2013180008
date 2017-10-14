@@ -14,7 +14,7 @@ but WITHOUT ANY WARRANTY.
 #include "Dependencies\freeglut.h"
 
 #include "Renderer.h"
-
+#include "Object.h"
 Renderer *g_Renderer = NULL;
 
 void RenderScene(void)
@@ -22,8 +22,11 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
+	//Object* ob1 = new Object(0.0f,0.0f,0.0f,100.0f,2.0f,0.0f,0.5f,1.0f,1.0f);
+	Object ob1(100, 100, 0, 20, 20, 10, 40, 30, 5);
+	g_Renderer->DrawSolidRect(ob1.Getx(), ob1.Gety(), ob1.Getz(), ob1.Getsize(), ob1.Getr(), ob1.Getg(), ob1.Getb(), ob1.Geta());
 	// Renderer Test
-	g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
+	g_Renderer->DrawSolidRect(30, 30, 0, 40, 10, 20, 30, 40);
 
 	glutSwapBuffers();
 }
@@ -83,6 +86,7 @@ int main(int argc, char **argv)
 	glutMainLoop();
 
 	delete g_Renderer;
+	
 
     return 0;
 }
