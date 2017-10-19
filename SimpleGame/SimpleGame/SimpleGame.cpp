@@ -31,6 +31,7 @@ void RenderScene(void)
 	for (int i = 0; i < obnum; i++)
 	{
 		g_Renderer->DrawSolidRect(oblist[i]->Getx(), oblist[i]->Gety(), oblist[i]->Getz(), oblist[i]->Getsize(), oblist[i]->Getr(), oblist[i]->Getg(), oblist[i]->Getb(), oblist[i]->Geta());
+		oblist[i]->Update();
 	}
 	
 	// Renderer Test
