@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include <iostream>
 using namespace std;
+
 Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float _speed) {
 	x = _x;
 	y = _y;
@@ -44,7 +45,12 @@ float Object::Getb() {
 float Object::Geta() {
 	return a;
 }
-
+void Object::Setx(float _x) {
+	x = _x;
+}
+void Object::Sety(float _y) {
+	y = _y;
+}
 void Object::Update() {	
 		x += speed;
 		y += speed;

@@ -24,7 +24,8 @@ public:
 	float Getg();
 	float Getb();
 	float Geta();
-	
+	void Setx(float x);
+	void Sety(float y);
 
 	void Update();
 
