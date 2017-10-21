@@ -15,10 +15,15 @@ but WITHOUT ANY WARRANTY.
 
 #include "Renderer.h"
 #include "Object.h"
+#include "ScenceMgr.h"
+
 Renderer *g_Renderer = NULL;
-Object* ob1 = new Object(50.0f, 50.0f, 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
-Object* oblist[100];
-int obnum = 0;
+//Object* ob1 = new Object(50.0f, 50.0f, 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
+//Object* oblist[100];
+//int obnum = 0;
+ScenceMgr* Scence = new ScenceMgr;
+
+
 
 void RenderScene(void)
 {
@@ -26,20 +31,26 @@ void RenderScene(void)
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
 	
+	//g_Renderer->DrawSolidRect(ob1->Getx(), ob1->Gety(), ob1->Getz(), ob1->Getsize(), ob1->Getr(), ob1->Getg(), ob1->Getb(), ob1->Geta());
 	
-	g_Renderer->DrawSolidRect(ob1->Getx(), ob1->Gety(), ob1->Getz(), ob1->Getsize(), ob1->Getr(), ob1->Getg(), ob1->Getb(), ob1->Geta());
-	for (int i = 0; i < obnum; i++)
+	
+	for (int i = 0; i < Scence->obnum; i++)
 	{
-		g_Renderer->DrawSolidRect(oblist[i]->Getx(), oblist[i]->Gety(), oblist[i]->Getz(), oblist[i]->Getsize(), oblist[i]->Getr(), oblist[i]->Getg(), oblist[i]->Getb(), oblist[i]->Geta());
-		oblist[i]->Update();
+		g_Renderer->DrawSolidRect(Scence->m_objects[i]->Getx(), Scence->m_objects[i]->Gety(),
+			                      Scence->m_objects[i]->Getz(), Scence->m_objects[i]->Getsize(), 
+			                      Scence->m_objects[i]->Getr(), Scence->m_objects[i]->Getg(),  
+			                      Scence->m_objects[i]->Getb(), Scence->m_objects[i]->Geta());
+		
+		//oblist[i]->Update();
 	}
-	
+	Scence->Update_AllObject();
 	// Renderer Test
-	g_Renderer->DrawSolidRect(30, 30, 0, 40, 10, 20, 30, 40);
-	ob1->Update();
+	//g_Renderer->DrawSolidRect(30, 30, 0, 40, 10, 20, 30, 40);
+	//ob1->Update();
 	glutSwapBuffers();
 	
 }
+
 
 void Idle(void)
 {
@@ -48,16 +59,15 @@ void Idle(void)
 }
 
 void MouseInput(int button, int state, int x, int y)
-{
-	
+{	
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		// ÁÂÇ¥º¯È¯x -250, -(y-250) 
 		//ob1->Setx(x - 250);
 		//ob1->Sety(-(y - 250));
-		Object* ob = new Object(x - 250, -(y - 250), 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
-		oblist[obnum] = ob;
-		obnum++;
+		//Object* ob = new Object(x - 250, -(y - 250), 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
+		//oblist[obnum] = ob;
+		//obnum++;
 	}
 	RenderScene();
 }
@@ -77,14 +87,17 @@ void makeob(float x,float y)
 	
 }
 
+
 int main(int argc, char **argv)
 {
+	
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Game Software Engineering KPU");
+	
 	
 	glewInit();
 	
@@ -98,8 +111,11 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
 	
+	g_Renderer = new Renderer(500, 500);
+	//Scence->g_m_Renderer = new Renderer(500, 500);
+
+
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
@@ -111,11 +127,14 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 	
+	
 	glutMainLoop();
 	
+	//delete Scence->g_m_Renderer;
 	delete g_Renderer;
-	delete ob1;
-	delete[] oblist;
+	delete Scence;
+	//delete ob1;
+	//delete[] oblist;
 
     return 0;
 }
