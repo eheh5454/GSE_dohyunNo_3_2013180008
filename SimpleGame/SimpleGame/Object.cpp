@@ -51,9 +51,15 @@ void Object::Setx(float _x) {
 void Object::Sety(float _y) {
 	y = _y;
 }
+
 void Object::Update() {	
+	if (x >= 0) {
+		x -= speed;
+		y -= speed;
+	}
+	else
 		x += speed;
 		y += speed;
-		cout << "update"<< x << " " << y  << endl;
+		
 }
 

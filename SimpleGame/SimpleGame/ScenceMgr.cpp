@@ -11,7 +11,7 @@ ScenceMgr::ScenceMgr()
 	for (int i = 0; i < obnum; i++) {
 		float x = -250 + rand() % 500;
 		float y = -250 + rand() % 500;
-		Object* ob = new Object(x, y, 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 1.0f);
+		Object* ob = new Object(x, y, 0.0f, 5.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
 		m_objects[i] = ob;
 	}
 }
@@ -22,25 +22,6 @@ ScenceMgr::~ScenceMgr()
 	
 }
 
-/*void ScenceMgr::MakeObjects()
-{
-	for (int i = 0; i < obnum; i++) {
-		float x = rand() % 250;
-		float y = rand() % 250;
-		Object* ob = new Object(x, y, 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
-		m_objects[i] = ob;
-	}
-}*/
-
-/*void ScenceMgr::RenderObjects(void)
-{		
-	for (int i = 0; i < obnum; i++)
-	{
-		g_m_Renderer->DrawSolidRect(m_objects[i]->Getx(), m_objects[i]->Gety(), m_objects[i]->Getz(), m_objects[i]->Getsize(), m_objects[i]->Getr(), m_objects[i]->Getg(), m_objects[i]->Getb(), m_objects[i]->Geta());
-		
-	}
-
-}*/
 
 void ScenceMgr::Update_AllObject(void)
 {
@@ -48,4 +29,17 @@ void ScenceMgr::Update_AllObject(void)
 		m_objects[i]->Update();
 	}
 	
+}
+
+void ScenceMgr::RenderObject(Renderer *Renderer)
+{
+	for (int i = 0; i < obnum; i++)
+	{
+	    Renderer->DrawSolidRect(m_objects[i]->Getx(), m_objects[i]->Gety(),
+			                    m_objects[i]->Getz(), m_objects[i]->Getsize(),
+			                    m_objects[i]->Getr(), m_objects[i]->Getg(),
+			                    m_objects[i]->Getb(), m_objects[i]->Geta());
+
+		//oblist[i]->Update();
+	}
 }

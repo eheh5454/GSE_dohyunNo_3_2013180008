@@ -18,11 +18,7 @@ but WITHOUT ANY WARRANTY.
 #include "ScenceMgr.h"
 
 Renderer *g_Renderer = NULL;
-//Object* ob1 = new Object(50.0f, 50.0f, 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
-//Object* oblist[100];
-//int obnum = 0;
 ScenceMgr* Scence = new ScenceMgr;
-
 
 
 void RenderScene(void)
@@ -30,23 +26,10 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
-	
-	//g_Renderer->DrawSolidRect(ob1->Getx(), ob1->Gety(), ob1->Getz(), ob1->Getsize(), ob1->Getr(), ob1->Getg(), ob1->Getb(), ob1->Geta());
-	
-	
-	for (int i = 0; i < Scence->obnum; i++)
-	{
-		g_Renderer->DrawSolidRect(Scence->m_objects[i]->Getx(), Scence->m_objects[i]->Gety(),
-			                      Scence->m_objects[i]->Getz(), Scence->m_objects[i]->Getsize(), 
-			                      Scence->m_objects[i]->Getr(), Scence->m_objects[i]->Getg(),  
-			                      Scence->m_objects[i]->Getb(), Scence->m_objects[i]->Geta());
-		
-		//oblist[i]->Update();
-	}
+
+	Scence->RenderObject(g_Renderer);
 	Scence->Update_AllObject();
-	// Renderer Test
-	//g_Renderer->DrawSolidRect(30, 30, 0, 40, 10, 20, 30, 40);
-	//ob1->Update();
+
 	glutSwapBuffers();
 	
 }
@@ -62,7 +45,7 @@ void MouseInput(int button, int state, int x, int y)
 {	
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		// ÁÂÇ¥º¯È¯x -250, -(y-250) 
+		// ÁÂÇ¥º¯È¯ x -250, -(y-250) 
 		//ob1->Setx(x - 250);
 		//ob1->Sety(-(y - 250));
 		//Object* ob = new Object(x - 250, -(y - 250), 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
@@ -130,7 +113,7 @@ int main(int argc, char **argv)
 	
 	glutMainLoop();
 	
-	//delete Scence->g_m_Renderer;
+	
 	delete g_Renderer;
 	delete Scence;
 	//delete ob1;
