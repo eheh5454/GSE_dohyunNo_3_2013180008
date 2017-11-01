@@ -7,14 +7,18 @@ private:
 	float y;
 	float z;
 	float size;
+public:
 	float r;
 	float g;
 	float b;
 	float a;
-	float speed;
+	float xspeed;
+	float yspeed;
+	float Life;
+	float Lifetime;
 	
 public:
-	Object(float _x,float _y, float _z, float _size,float _r, float _g,float _b,float _a,float _speed);
+	Object(float _x,float _y, float _z, float _size,float _r, float _g,float _b,float _a);
 	~Object();
 	float Getx();
 	float Gety();
@@ -24,9 +28,10 @@ public:
 	float Getg();
 	float Getb();
 	float Geta();
+	float GetLifetime();
 	void Setx(float x);
 	void Sety(float y);
-
+	
 	void Update();
 
 

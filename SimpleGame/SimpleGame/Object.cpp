@@ -1,11 +1,13 @@
-
 #include "stdafx.h"
 #include "Object.h"
 #include "Renderer.h"
 #include <iostream>
+#include "stdlib.h"
+
 using namespace std;
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float _speed) {
+Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a) 
+{
 	x = _x;
 	y = _y;
 	z = _z;
@@ -14,8 +16,11 @@ Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, fl
 	g = _g;
 	b = _b;
 	a = _a;
-	speed = _speed;
-	
+	xspeed = 0.1f * (rand() % 5 - 0.5f);
+	yspeed = 0.1f * (rand() % 5 - 0.1f);
+	Lifetime = 10000.0f;
+	Life = 100.f;
+
 }
 
 Object::~Object() {}
@@ -51,15 +56,31 @@ void Object::Setx(float _x) {
 void Object::Sety(float _y) {
 	y = _y;
 }
+float Object::GetLifetime() {
+	return Lifetime;
+}
 
 void Object::Update() {	
-	if (x >= 0) {
-		x -= speed;
-		y -= speed;
-	}
-	else
-		x += speed;
-		y += speed;
-		
+	
+	    this->x = x + xspeed;
+		this->y = y + yspeed;
+
+		if (x > 250)
+		{
+			xspeed = -xspeed;
+		}
+		if (x < -250)
+		{
+			xspeed = -xspeed;
+		}
+		if (y > 250)
+		{
+			yspeed = -yspeed;
+		}
+		if (y < -250)
+		{
+			yspeed = -yspeed;
+		}
+		Lifetime -= 1.f;
 }
 

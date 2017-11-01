@@ -26,9 +26,9 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
-
 	Scence->RenderObject(g_Renderer);
 	Scence->Update_AllObject();
+	//Scence->CollisionTest();	
 
 	glutSwapBuffers();
 	
@@ -51,6 +51,7 @@ void MouseInput(int button, int state, int x, int y)
 		//Object* ob = new Object(x - 250, -(y - 250), 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
 		//oblist[obnum] = ob;
 		//obnum++;
+		Scence->Clickmake(x, y);
 	}
 	RenderScene();
 }
@@ -63,11 +64,6 @@ void KeyInput(unsigned char key, int x, int y)
 void SpecialKeyInput(int key, int x, int y)
 {
 	RenderScene();
-}
-
-void makeob(float x,float y)
-{
-	
 }
 
 
