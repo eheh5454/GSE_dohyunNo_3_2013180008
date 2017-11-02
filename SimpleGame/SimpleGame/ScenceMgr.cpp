@@ -4,30 +4,32 @@
 #include "Renderer.h"
 #include "Object.h"
 
-ScenceMgr::ScenceMgr():obnum(0)
+ScenceMgr::ScenceMgr(int width,int height):obnum(0)
 {
+	m_renderer = new Renderer(width, height);
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		m_objects[i] = NULL;
 	}
-	/*
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
-		float x = -250 + rand() % 500;
-		float y = -250 + rand() % 500;
-		Object* ob = new Object(x, y, 0.0f, 10.0f, 10.0f, 20.0f, 30.0f, 1.0f);
-		m_objects[i] = ob;
-	}*/
+
+	if (!m_renderer->IsInitialized())
+	{
+	std::cout << "Renderer could not be initialized.. \n";
+	}
+
 }
 
 
 ScenceMgr::~ScenceMgr()
-{
-	delete[] m_objects;
+{	
 	
 }
 
 
 void ScenceMgr::Update_AllObject(void)
 {
+	if (obnum >= 10) {
+		obnum = 0;
+	}
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (m_objects[i] != NULL) {
 			m_objects[i]->Update();
@@ -49,14 +51,14 @@ void ScenceMgr::Clickmake(int x, int y)
 	}
 }
 
-void ScenceMgr::RenderObject(Renderer *Renderer)
+void ScenceMgr::RenderObject()
 {
 	CollisionTest();
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 		if (m_objects[i] != NULL) 
 		{
-			Renderer->DrawSolidRect(m_objects[i]->Getx(), m_objects[i]->Gety(),
+			m_renderer->DrawSolidRect(m_objects[i]->Getx(), m_objects[i]->Gety(),
 				m_objects[i]->Getz(), m_objects[i]->Getsize(),
 				m_objects[i]->Getr(), m_objects[i]->Getg(),
 				m_objects[i]->Getb(), m_objects[i]->Geta());

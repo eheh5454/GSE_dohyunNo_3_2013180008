@@ -17,8 +17,8 @@ but WITHOUT ANY WARRANTY.
 #include "Object.h"
 #include "ScenceMgr.h"
 
-Renderer *g_Renderer = NULL;
-ScenceMgr* Scence = new ScenceMgr;
+
+ScenceMgr* Scence = NULL;
 
 
 void RenderScene(void)
@@ -26,9 +26,9 @@ void RenderScene(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
-	Scence->RenderObject(g_Renderer);
+	Scence->RenderObject();
 	Scence->Update_AllObject();
-	//Scence->CollisionTest();	
+	
 
 	glutSwapBuffers();
 	
@@ -45,12 +45,6 @@ void MouseInput(int button, int state, int x, int y)
 {	
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		// ÁÂÇ¥º¯È¯ x -250, -(y-250) 
-		//ob1->Setx(x - 250);
-		//ob1->Sety(-(y - 250));
-		//Object* ob = new Object(x - 250, -(y - 250), 0.0f, 20.0f, 20.0f, 10.0f, 40.0f, 30.0f, 0.01f);
-		//oblist[obnum] = ob;
-		//obnum++;
 		Scence->Clickmake(x, y);
 	}
 	RenderScene();
@@ -91,14 +85,11 @@ int main(int argc, char **argv)
 
 	// Initialize Renderer
 	
-	g_Renderer = new Renderer(500, 500);
-	//Scence->g_m_Renderer = new Renderer(500, 500);
+	
+	Scence = new ScenceMgr(500, 500);
 
 
-	if (!g_Renderer->IsInitialized())
-	{
-		std::cout << "Renderer could not be initialized.. \n";
-	}
+	
 	
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
@@ -110,10 +101,8 @@ int main(int argc, char **argv)
 	glutMainLoop();
 	
 	
-	delete g_Renderer;
+	
 	delete Scence;
-	//delete ob1;
-	//delete[] oblist;
 
     return 0;
 }

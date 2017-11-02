@@ -2,17 +2,18 @@
 #include <iostream>
 #include "Object.h"
 #include "Renderer.h"
-#define MAX_OBJECT_COUNT 70
+#define MAX_OBJECT_COUNT 30
 
 class ScenceMgr {
 private:
 	Object* m_objects[MAX_OBJECT_COUNT];
 	int obnum;
 public:
-	ScenceMgr();
+	Renderer* m_renderer;
+	ScenceMgr(int width,int height);
 	~ScenceMgr();
 	void Update_AllObject(void);
-	void RenderObject(Renderer *Renderer);
+	void RenderObject();
 	void CollisionTest();
 	void Clickmake(int x, int y);
 };
