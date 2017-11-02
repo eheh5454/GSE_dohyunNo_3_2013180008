@@ -8,6 +8,7 @@ using namespace std;
 
 Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a) 
 {
+	srand(time(NULL));
 	x = _x;
 	y = _y;
 	z = _z;
@@ -17,7 +18,7 @@ Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, fl
 	b = _b;
 	a = _a;
 	xspeed = 0.1f * (rand() % 5 - 0.5f);
-	yspeed = 0.1f * (rand() % 5 - 0.1f);
+	yspeed = 0.1f * (rand() % 5 - 0.5f);
 	Lifetime = 10000.0f;
 	Life = 100.f;
 
