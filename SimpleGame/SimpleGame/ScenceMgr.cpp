@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "ScenceMgr.h"
 #include "Renderer.h"
@@ -7,6 +6,7 @@
 ScenceMgr::ScenceMgr(int width,int height):obnum(0)
 {
 	m_renderer = new Renderer(width, height);
+
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		m_objects[i] = NULL;
 	}
@@ -35,6 +35,7 @@ void ScenceMgr::Update_AllObject(void)
 			m_objects[i]->Update();
 			if (m_objects[i]->GetLifetime() == 0.f || m_objects[i]->Life == 0.f) {
 				delete m_objects[i];
+				m_objects[i] = NULL;
 
 			}
 		}
@@ -49,6 +50,7 @@ void ScenceMgr::Clickmake(int x, int y)
 		m_objects[obnum] = ob;
 		obnum++;
 	}
+	
 }
 
 void ScenceMgr::RenderObject()
@@ -63,14 +65,11 @@ void ScenceMgr::RenderObject()
 				m_objects[i]->Getr(), m_objects[i]->Getg(),
 				m_objects[i]->Getb(), m_objects[i]->Geta());
 		}
-
 	}
-	
 }
 
 void ScenceMgr::CollisionTest()
-{
-	
+{	
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 			for (int j = 0; j < MAX_OBJECT_COUNT; j++)
@@ -92,8 +91,7 @@ void ScenceMgr::CollisionTest()
 					else
 						m_objects[i]->r = 1, m_objects[i]->g = 1, m_objects[i]->b = 1;
 				}
-
-			}
+		     }
 	}
 }
 	

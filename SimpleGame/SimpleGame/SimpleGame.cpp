@@ -29,7 +29,6 @@ void RenderScene(void)
 	Scence->RenderObject();
 	Scence->Update_AllObject();
 	
-
 	glutSwapBuffers();
 	
 }
@@ -89,8 +88,6 @@ int main(int argc, char **argv)
 	Scence = new ScenceMgr(500, 500);
 
 
-	
-	
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
@@ -99,7 +96,6 @@ int main(int argc, char **argv)
 	
 	
 	glutMainLoop();
-	
 	
 	
 	delete Scence;
