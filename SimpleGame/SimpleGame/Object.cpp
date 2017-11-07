@@ -6,9 +6,9 @@
 
 using namespace std;
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a) 
+Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life) 
 {
-	srand(time(NULL));
+	
 	x = _x;
 	y = _y;
 	z = _z;
@@ -17,10 +17,11 @@ Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, fl
 	g = _g;
 	b = _b;
 	a = _a;
-	xspeed = 0.1f * (rand() % 5 - 0.5f);
-	yspeed = 0.1f * (rand() % 5 - 0.5f);
+	//0~1까지의 실수난수를 생성해서 0.5를 빼서 랜덤방향을 생성하고, 방향을 speed에 곱해준다.
+	xspeed = speed * (float)((rand() % 1000 + 1) * 0.001 - 0.5f);
+	yspeed = speed * (float)((rand() % 1000 + 1) * 0.001 - 0.5f);
 	Lifetime = 10000.0f;
-	Life = 100.f;
+	Life = _Life;
 
 }
 
@@ -51,37 +52,30 @@ float Object::Getb() {
 float Object::Geta() {
 	return a;
 }
-void Object::Setx(float _x) {
-	x = _x;
-}
-void Object::Sety(float _y) {
-	y = _y;
-}
-float Object::GetLifetime() {
-	return Lifetime;
-}
 
-void Object::Update() {	
-	
-	    this->x = x + xspeed;
-		this->y = y + yspeed;
 
-		if (x > 250)
-		{
-			xspeed = -xspeed;
-		}
-		if (x < -250)
-		{
-			xspeed = -xspeed;
-		}
-		if (y > 250)
-		{
-			yspeed = -yspeed;
-		}
-		if (y < -250)
-		{
-			yspeed = -yspeed;
-		}
-		Lifetime -= 1.f;
+void Object::Update(float elaspedtime) {
+	//elaspedtime을 second로 변환 
+	float second = elaspedtime * 0.001f;
+	this->x = x + xspeed * second;
+    this->y = y + yspeed * second;
+
+	if (x > 250)
+	{
+		xspeed = -xspeed;
+	}
+	if (x < -250)
+	{
+		xspeed = -xspeed;
+	}
+	if (y > 250)
+	{
+		yspeed = -yspeed;
+	}
+	if (y < -250)
+	{
+		yspeed = -yspeed;
+	}
+	Lifetime -= 0.5f;
 }
 

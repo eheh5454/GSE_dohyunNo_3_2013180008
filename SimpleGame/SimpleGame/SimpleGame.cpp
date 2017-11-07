@@ -8,10 +8,12 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY.
 */
 
+
 #include "stdafx.h"
 #include <iostream>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
+
 
 #include "Renderer.h"
 #include "Object.h"
@@ -19,15 +21,19 @@ but WITHOUT ANY WARRANTY.
 
 
 ScenceMgr* Scence = NULL;
-
+DWORD starttime = 0;
 
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
+	DWORD nowtime = timeGetTime();
+	DWORD elaspedtime = nowtime - starttime;
+	starttime = nowtime;
+
 	Scence->RenderObject();
-	Scence->Update_AllObject();
+	Scence->Update_AllObject((float)elaspedtime);
 	
 	glutSwapBuffers();
 	
@@ -87,16 +93,13 @@ int main(int argc, char **argv)
 	
 	Scence = new ScenceMgr(500, 500);
 
-
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 	
-	
-	glutMainLoop();
-	
+	glutMainLoop();	
 	
 	delete Scence;
 
