@@ -13,7 +13,7 @@ ScenceMgr::ScenceMgr(int width,int height):obnum(0),bulletnum(0),time(0)
 
 	if (!m_renderer->IsInitialized())
 	{
-	std::cout << "Renderer could not be initialized.. \n";
+		cout << "Renderer could not be initialized.. " << endl;
 	}
 
 }
@@ -42,7 +42,6 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	}
 	// 0.5초마다 총알을 생성 
 	time += (elaspedtime*0.001f);
-	cout << time << endl;
 	if (bulletnum < MAX_OBJECT_COUNT) {
 		if (time >= 0.5f) {
 			MakeBullet();
@@ -159,7 +158,7 @@ void ScenceMgr::CollisionTest()
 			{
 				Building->Life -= m_objects[i]->Life;
 				m_objects[i]->Life = 0;
-				cout << Building->Life << endl;
+				cout << "Building HP:" << Building->Life << endl;
 			}
 		}
 

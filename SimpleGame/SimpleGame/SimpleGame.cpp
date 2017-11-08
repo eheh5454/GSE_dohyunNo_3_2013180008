@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		std::cout << "GLEW 3.0 not supported\n ";
+		cout << "GLEW 3.0 not supported "<< endl;
 	}
 
 	// Initialize Renderer
