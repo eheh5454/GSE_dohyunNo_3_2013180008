@@ -16,7 +16,7 @@ public:
 	float a;
 	float Life;
 	float Lifetime;
-	float arrow_id;
+	int arrow_id;
 	float arrow_time;
 	
 public:

@@ -8,13 +8,6 @@ ScenceMgr::ScenceMgr(int width,int height):obnum(0),bulletnum(0),time(0),bullett
 	m_renderer = new Renderer(width, height);
 	m_texCharacter = m_renderer->CreatePngTexture("./Resource/Building.png");
 
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
-		m_objects[i] = NULL;
-	}
-
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
-		Arrows[i] = NULL;
-	}
 
 	if (!m_renderer->IsInitialized())
 	{
@@ -35,6 +28,16 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	if (obnum >= 10) {
 		obnum = 0;
 	}
+	if (arrownum >= MAX_OBJECT_COUNT) {
+		arrownum = 0;
+	}
+
+	// 0.5초마다 화살 생성 
+	MakeArrow(elaspedtime);
+
+	// 0.5초마다 총알을 생성 
+	MakeBullet(elaspedtime);
+
 	//캐릭터의 Life or Lifetime이 0이하가 되면 삭제해줌 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (m_objects[i] != NULL) {
@@ -46,14 +49,8 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 			}
 		}
 	}
-
-	// 0.5초마다 화살 생성 
-	MakeArrow(elaspedtime);
-
-	// 0.5초마다 총알을 생성 
-	MakeBullet(elaspedtime);
 	
-	//arrow 업데이트 
+	// arrow의 Life or Lifetime이 0이하가 되면 삭제해줌  
 	for (int i = 0; i < arrownum; i++) {
 		if (Arrows[i] != NULL) {
 			Arrows[i]->Update(elaspedtime);
@@ -87,10 +84,19 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 //Arrow를 생성해주는 함수
 void ScenceMgr::MakeArrow(float elaspedtime)
 {	
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
+	for (int i = 0; i < obnum; i++) {
 		if (m_objects[i] != NULL) {
 			m_objects[i]->arrow_time += (elaspedtime * 0.001f);
 			if (m_objects[i]->arrow_time > 0.5f && Arrows[arrownum] == NULL) {
+				Object* Arrow = new Object(m_objects[i]->Getx(), m_objects[i]->Gety(), OBJECT_ARROW);
+				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
+				Arrow->arrow_id = i;
+				Arrows[arrownum] = Arrow;
+				arrownum++;
+				m_objects[i]->arrow_time = 0.f;
+			}
+			else if (m_objects[i]->arrow_time > 0.5f && Arrows[arrownum] != NULL) {
+				delete Arrows[arrownum];
 				Object* Arrow = new Object(m_objects[i]->Getx(), m_objects[i]->Gety(), OBJECT_ARROW);
 				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
 				Arrow->arrow_id = i;
@@ -107,15 +113,17 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 //Bullet을 생성해주는 함수 
 void ScenceMgr::MakeBullet(float elaspedtime)
 {
-	bullettime += (elaspedtime*0.001f);
-	if (bulletnum < MAX_OBJECT_COUNT) {
-		if (bullettime >= 0.5f) {
-			Object* bullet = new Object(0.f, 0.f, OBJECT_BULLET);
-			Bullets[bulletnum] = bullet;
-			bulletnum++;
-			bullettime = 0;
-		}
+	if (Building != NULL) {
+		bullettime += (elaspedtime*0.001f);
+		if (bulletnum < MAX_OBJECT_COUNT) {
+			if (bullettime >= 0.5f) {
+				Object* bullet = new Object(0.f, 0.f, OBJECT_BULLET);
+				Bullets[bulletnum] = bullet;
+				bulletnum++;
+				bullettime = 0;
+			}
 
+		}
 	}
 }
 
@@ -123,7 +131,7 @@ void ScenceMgr::MakeBullet(float elaspedtime)
 void ScenceMgr::Clickmake(int x, int y)
 {	
 	if (m_objects[obnum] == NULL) {
-		Object* ob = new Object((float)x - 250, (float)-(y - 250), OBJECT_CHARACTER);
+		Object* ob = new Object((float)x - 250, (float)-(y - 400), OBJECT_CHARACTER);
 		m_objects[obnum] = ob;
 		obnum++;
 	}
@@ -253,7 +261,7 @@ void ScenceMgr::CollisionTest()
 			}
 		}
 	}
-	// Building과 arrow의 충돌 
+	//Building과 arrow의 충돌 
 	for (int i = 0; i < arrownum; i++)
 	{
 		if (Building != NULL && Arrows[i] != NULL) {

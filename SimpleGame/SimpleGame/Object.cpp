@@ -68,11 +68,11 @@ void Object::Update(float elaspedtime) {
 	{
 		xspeed = -xspeed;
 	}
-	if (y > 250)
+	if (y > 400)
 	{
 		yspeed = -yspeed;
 	}
-	if (y < -250)
+	if (y < -400)
 	{
 		yspeed = -yspeed;
 	}
