@@ -253,6 +253,22 @@ void ScenceMgr::CollisionTest()
 			}
 		}
 	}
+	// Building과 arrow의 충돌 
+	for (int i = 0; i < arrownum; i++)
+	{
+		if (Building != NULL && Arrows[i] != NULL) {
+			if ((Building->Getx() - Building->Getsize() / 2.f) < (Arrows[i]->Getx() + Arrows[i]->Getsize() / 2.f) &&
+				(Building->Getx() + Building->Getsize() / 2.f) > (Arrows[i]->Getx() - Arrows[i]->Getsize() / 2.f) &&
+				(Building->Gety() - Building->Getsize() / 2.f) < (Arrows[i]->Gety() + Arrows[i]->Getsize() / 2.f) &&
+				(Building->Gety() + Building->Getsize() / 2.f) > (Arrows[i]->Gety() - Arrows[i]->Getsize() / 2.f))
+			{
+				Building->Life -= Arrows[i]->Life;
+				Arrows[i]->Life = 0;
+				cout << "Building HP:" << Building->Life << endl;
+			}
+		}
+
+	}
 	
 }
 
