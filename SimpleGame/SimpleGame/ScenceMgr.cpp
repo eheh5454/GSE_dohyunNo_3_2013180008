@@ -3,12 +3,17 @@
 #include "Renderer.h"
 #include "Object.h"
 
-ScenceMgr::ScenceMgr(int width,int height):obnum(0),bulletnum(0),time(0)
+ScenceMgr::ScenceMgr(int width,int height):obnum(0),bulletnum(0),time(0),bullettime(0),arrownum(0)
 {
 	m_renderer = new Renderer(width, height);
+	m_texCharacter = m_renderer->CreatePngTexture("./Resource/Building.png");
 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		m_objects[i] = NULL;
+	}
+
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
+		Arrows[i] = NULL;
 	}
 
 	if (!m_renderer->IsInitialized())
@@ -25,7 +30,8 @@ ScenceMgr::~ScenceMgr()
 
 //전체 오브젝트 업데이트 함수 
 void ScenceMgr::Update_AllObject(float elaspedtime)
-{   //obnum이 10이상이 되면 0으로 초기화하여 10개로 제한 
+{   
+	//obnum이 10이상이 되면 0으로 초기화하여 10개로 제한 
 	if (obnum >= 10) {
 		obnum = 0;
 	}
@@ -40,12 +46,21 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 			}
 		}
 	}
+
+	// 0.5초마다 화살 생성 
+	MakeArrow(elaspedtime);
+
 	// 0.5초마다 총알을 생성 
-	time += (elaspedtime*0.001f);
-	if (bulletnum < MAX_OBJECT_COUNT) {
-		if (time >= 0.5f) {
-			MakeBullet();
-			time = 0;
+	MakeBullet(elaspedtime);
+	
+	//arrow 업데이트 
+	for (int i = 0; i < arrownum; i++) {
+		if (Arrows[i] != NULL) {
+			Arrows[i]->Update(elaspedtime);
+			if (Arrows[i]->Lifetime <= 0.1f || Arrows[i]->Life <= 0.f) {
+				delete Arrows[i];
+				Arrows[i] = NULL;
+			}
 		}
 	}
 		
@@ -69,14 +84,41 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 		
 }
-//Bullet을 생성해주는 함수 
-void ScenceMgr::MakeBullet()
-{
-	Object* bullet = new Object(0.f, 0.f, OBJECT_BULLET);
-	Bullets[bulletnum] = bullet;
-	bulletnum++;
-
+//Arrow를 생성해주는 함수
+void ScenceMgr::MakeArrow(float elaspedtime)
+{	
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
+		if (m_objects[i] != NULL) {
+			m_objects[i]->arrow_time += (elaspedtime * 0.001f);
+			if (m_objects[i]->arrow_time > 0.5f && Arrows[arrownum] == NULL) {
+				Object* Arrow = new Object(m_objects[i]->Getx(), m_objects[i]->Gety(), OBJECT_ARROW);
+				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
+				Arrow->arrow_id = i;
+				Arrows[arrownum] = Arrow;
+				arrownum++;
+				m_objects[i]->arrow_time = 0.f;
+			}
+		}
+	}
 }
+		
+	
+
+//Bullet을 생성해주는 함수 
+void ScenceMgr::MakeBullet(float elaspedtime)
+{
+	bullettime += (elaspedtime*0.001f);
+	if (bulletnum < MAX_OBJECT_COUNT) {
+		if (bullettime >= 0.5f) {
+			Object* bullet = new Object(0.f, 0.f, OBJECT_BULLET);
+			Bullets[bulletnum] = bullet;
+			bulletnum++;
+			bullettime = 0;
+		}
+
+	}
+}
+
 //클릭하는 위치에 캐릭터를 만들어주는 함수 
 void ScenceMgr::Clickmake(int x, int y)
 {	
@@ -105,8 +147,8 @@ void ScenceMgr::RenderObject()
 
 	//빌딩 렌더 
 	if (Building != NULL) {
-		m_renderer->DrawSolidRect(Building->Getx(), Building->Gety(), Building->Getz(), Building->Getsize(),
-			Building->Getr(), Building->Getg(), Building->Getb(), Building->Geta());
+		m_renderer->DrawTexturedRect(Building->Getx(), Building->Gety(), Building->Getz(), Building->Getsize(),
+			Building->Getr(), Building->Getg(), Building->Getb(), Building->Geta(),m_texCharacter);
 	}
 
 	//총알 렌더 
@@ -114,6 +156,13 @@ void ScenceMgr::RenderObject()
 		if (Bullets[i] != NULL) {
 			m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
 				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta());
+		}
+	}
+	//Arrow 렌더 
+	for (int i = 0; i < arrownum; i++) {
+		if (Arrows[i] != NULL) {
+			m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
+				Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta());
 		}
 	}
 }
@@ -177,6 +226,31 @@ void ScenceMgr::CollisionTest()
 						m_objects[i]->Life -= Bullets[j]->Life;
 				}
 			}	
+		}
+	 }
+	//character와 arrow의 충돌 
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	{
+		if (m_objects[i] != NULL) {
+			for (int j = 0; j < arrownum; j++)
+			{
+				//arrow의 id와 캐릭터의 i가 같으면 continue
+				if (Arrows[j] != NULL && Arrows[j]->arrow_id == i)
+				{
+					continue;
+				}
+
+				if (Arrows[j] != NULL) {
+					if ((m_objects[i]->Getx() - m_objects[i]->Getsize() / 2.f) < (Arrows[j]->Getx() + Arrows[j]->Getsize() / 2.f) &&
+						(m_objects[i]->Getx() + m_objects[i]->Getsize() / 2.f) > (Arrows[j]->Getx() - Arrows[j]->Getsize() / 2.f) &&
+						(m_objects[i]->Gety() - m_objects[i]->Getsize() / 2.f) < (Arrows[j]->Gety() + Arrows[j]->Getsize() / 2.f) &&
+						(m_objects[i]->Gety() + m_objects[i]->Getsize() / 2.f) > (Arrows[j]->Gety() - Arrows[j]->Getsize() / 2.f)) 
+					{
+						m_objects[i]->Life -= Arrows[j]->Life;
+					}
+				
+				}
+			}
 		}
 	}
 	

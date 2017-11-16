@@ -3,10 +3,10 @@
 #include "Renderer.h"
 #include <iostream>
 #include "stdlib.h"
-
+#include "ScenceMgr.h"
 using namespace std;
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life) 
+Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life): arrow_id(0), arrow_time(0.f)
 {
 	
 	x = _x;
