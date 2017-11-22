@@ -18,7 +18,7 @@ public:
 	float Lifetime;
 	int arrow_id;
 	float arrow_time;
-	
+	int team;
 public:
 	Object(float _x,float _y, float _z, float _size,float _r, float _g,float _b,float _a,float speed,float _Life);
 	~Object();

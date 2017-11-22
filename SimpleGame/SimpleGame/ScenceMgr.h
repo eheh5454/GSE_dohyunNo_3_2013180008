@@ -8,20 +8,34 @@
 #define OBJECT_BULLET 0.f, 2.f, 1.f, 0.f, 0.f, 1.f, 600.f, 20.f
 #define OBJECT_ARROW 0.f, 2.f, 0.f, 1.f, 0.f, 1.f, 100.f, 10.f
 
+#define TEAM1_CHARACTER 0.f, 10.f, 1.f, 0.f, 0.f, 1.f, 300.f, 10.f 
+#define TEAM2_CHARACTER 0.f, 10.f, 0.f, 0.f, 1.f, 1.f, 300.f, 10.f 
+#define TEAM2_CHARACTER 0.f, 10.f, 0.f, 0.f, 1.f, 1.f, 300.f, 10.f 
+#define TEAM1_BUILDING 0.f, 100.f, 1.f, 1.f, 0.f, 0.f, 0.f, 500.f
+#define TEAM2_BUILDING 0.f, 100.f, 1.f, 1.f, 0.f, 0.f, 0.f, 500.f
+#define TEAM1_BULLET 0.f, 2.f, 1.f, 0.f, 0.f, 1.f, 600.f, 20.f
+#define TEAM2_BULLET 0.f, 2.f, 0.f, 0.f, 1.f, 1.f, 600.f, 20.f
+#define TEAM1_ARROW 0.f, 2.f, 0.5f, 0.2f, 0.7f, 1.f, 100.f, 10.f
+#define TEAM2_ARROW 0.f, 2.f, 1.f, 1.f, 0.f, 1.f, 100.f, 10.f
+
 class ScenceMgr {
 private:
-	Object* m_objects[MAX_OBJECT_COUNT];
+	Object* Characters[MAX_OBJECT_COUNT];
 	Renderer* m_renderer;
-	Object* Building = new Object(0.f, 0.f, OBJECT_BUILDING);
+	Object* Building[6];
 	Object* Bullets[MAX_OBJECT_COUNT];
 	Object* Arrows[MAX_OBJECT_COUNT];
-	GLuint m_texCharacter;
-	int obnum;
+	GLuint m_texbuilding1;
+	GLuint m_texbuilding2;
+
+	int characternum;
 	int bulletnum;
 	int arrownum;
 	float time;
 	float bullettime;
 	float arrowtime;
+	float team1_charactertime;
+	float team2_charactertime;
 public:
 	ScenceMgr(int width,int height);
 	~ScenceMgr();
@@ -31,5 +45,7 @@ public:
 	void Clickmake(int x, int y);
 	void MakeBullet(float elaspedtime);
 	void MakeArrow(float elaspedtime);
+	void MakeCharacter(float elaspedtime);
+	bool CollisionCheck(Object *a, Object *b);
 	
 };

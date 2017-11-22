@@ -3,11 +3,27 @@
 #include "Renderer.h"
 #include "Object.h"
 
-ScenceMgr::ScenceMgr(int width,int height):obnum(0),bulletnum(0),time(0),bullettime(0),arrownum(0)
+ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0)
 {
 	m_renderer = new Renderer(width, height);
-	m_texCharacter = m_renderer->CreatePngTexture("./Resource/Building.png");
+	m_texbuilding1 = m_renderer->CreatePngTexture("./Resource/Building.png");
+	m_texbuilding2 = m_renderer->CreatePngTexture("./Resource/agumon.png");
+	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
+	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
+	Object* building3 = new Object(150.f, 300.f, TEAM1_BUILDING);
+	Object* building4 = new Object(-150.f, -300.f, TEAM2_BUILDING);
+	Object* building5 = new Object(0.f, -300.f, TEAM2_BUILDING);
+	Object* building6 = new Object(150.f, -300.f, TEAM2_BUILDING);
 
+	building1->team, building2->team, building3->team = 1;
+	building4->team, building5->team, building6->team = 2;
+
+	Building[0] = building1;
+	Building[1] = building2;
+	Building[2] = building3; 
+	Building[3] = building4;
+	Building[4] = building5;
+	Building[5] = building6;
 
 	if (!m_renderer->IsInitialized())
 	{
@@ -24,27 +40,28 @@ ScenceMgr::~ScenceMgr()
 //전체 오브젝트 업데이트 함수 
 void ScenceMgr::Update_AllObject(float elaspedtime)
 {   
-	//obnum이 10이상이 되면 0으로 초기화하여 10개로 제한 
-	if (obnum >= 10) {
-		obnum = 0;
-	}
+	
 	if (arrownum >= MAX_OBJECT_COUNT) {
 		arrownum = 0;
 	}
 
-	// 0.5초마다 화살 생성 
+	
 	MakeArrow(elaspedtime);
 
-	// 0.5초마다 총알을 생성 
+	MakeCharacter(elaspedtime);
+
 	MakeBullet(elaspedtime);
+
+	team2_charactertime += (elaspedtime * 0.001f);
+	
 
 	//캐릭터의 Life or Lifetime이 0이하가 되면 삭제해줌 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
-		if (m_objects[i] != NULL) {
-			m_objects[i]->Update(elaspedtime);
-			if (m_objects[i]->Lifetime <= 0.f || m_objects[i]->Life <= 0.f) {
-				delete m_objects[i];
-				m_objects[i] = NULL;
+		if (Characters[i] != NULL) {
+			Characters[i]->Update(elaspedtime);
+			if (Characters[i]->Lifetime <= 0.f || Characters[i]->Life <= 0.f) {
+				delete Characters[i];
+				Characters[i] = NULL;
 
 			}
 		}
@@ -71,11 +88,14 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 			}
 		}
 	}
+	
 	//빌딩 Life가 0이하가 되면 제거 
-	if (Building != NULL) {
-		if (Building->Life <= 0) {
-			delete Building;
-			Building = NULL;
+	for (int i = 0; i < 6; i++) {
+		if (Building[i] != NULL) {
+			if (Building[i]->Life <= 0) {
+				delete Building[i];
+				Building[i] = NULL;
+			}
 		}
 	}
 
@@ -84,56 +104,90 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 //Arrow를 생성해주는 함수
 void ScenceMgr::MakeArrow(float elaspedtime)
 {	
-	for (int i = 0; i < obnum; i++) {
-		if (m_objects[i] != NULL) {
-			m_objects[i]->arrow_time += (elaspedtime * 0.001f);
-			if (m_objects[i]->arrow_time > 0.5f && Arrows[arrownum] == NULL) {
-				Object* Arrow = new Object(m_objects[i]->Getx(), m_objects[i]->Gety(), OBJECT_ARROW);
-				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
-				Arrow->arrow_id = i;
-				Arrows[arrownum] = Arrow;
+	for (int i = 0; i < characternum; i++) {
+		if (Characters[i] != NULL) {
+			Characters[i]->arrow_time += (elaspedtime * 0.001f);
+			if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
+				if (Characters[i]->team == 1) {
+					Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), TEAM1_ARROW);
+					Arrow->team = Characters[i]->team;
+					Arrow->arrow_id = i;
+					Arrows[arrownum] = Arrow;
+				}
+				else if (Characters[i]->team == 2) {
+					Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), TEAM2_ARROW);
+					Arrow->team = Characters[i]->team;
+					Arrow->arrow_id = i;
+					Arrows[arrownum] = Arrow;
+				}				
 				arrownum++;
-				m_objects[i]->arrow_time = 0.f;
+				Characters[i]->arrow_time = 0.f;
 			}
-			else if (m_objects[i]->arrow_time > 0.5f && Arrows[arrownum] != NULL) {
+			else if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] != NULL) {
 				delete Arrows[arrownum];
-				Object* Arrow = new Object(m_objects[i]->Getx(), m_objects[i]->Gety(), OBJECT_ARROW);
+				Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), OBJECT_ARROW);
 				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
 				Arrow->arrow_id = i;
+				Arrow->team = Characters[i]->team;
 				Arrows[arrownum] = Arrow;
 				arrownum++;
-				m_objects[i]->arrow_time = 0.f;
+				Characters[i]->arrow_time = 0.f;
 			}
 		}
 	}
 }
-		
+
+void ScenceMgr::MakeBullet(float elaspedtime) 
+{
+	bullettime += (elaspedtime * 0.001f);
+	if (bullettime >= 1.f) {
+		for (int i = 0; i < 6; i++) {
+			if (Building[i] != NULL) {
+				if (i < 3) {
+					Object* bullet = new Object(Building[i]->Getx(), Building[i]->Gety(), TEAM1_BULLET);
+					Bullets[bulletnum] = bullet;
+					Bullets[bulletnum]->team = 1;
+					bulletnum++;
+				}
+				else {
+					Object* bullet = new Object(Building[i]->Getx(), Building[i]->Gety(), TEAM2_BULLET);
+					Bullets[bulletnum] = bullet;
+					Bullets[bulletnum]->team = 2;
+					bulletnum++;
+				}
+			}
+		}
+		bullettime = 0;
+	}
 	
 
-//Bullet을 생성해주는 함수 
-void ScenceMgr::MakeBullet(float elaspedtime)
+}
+	
+//team1 캐릭터 5초마다 생성해주는 함수 
+void ScenceMgr::MakeCharacter(float elaspedtime)
 {
-	if (Building != NULL) {
-		bullettime += (elaspedtime*0.001f);
-		if (bulletnum < MAX_OBJECT_COUNT) {
-			if (bullettime >= 0.5f) {
-				Object* bullet = new Object(0.f, 0.f, OBJECT_BULLET);
-				Bullets[bulletnum] = bullet;
-				bulletnum++;
-				bullettime = 0;
-			}
-
+	team1_charactertime += elaspedtime * 0.001f;
+	if (team1_charactertime > 5.f) {
+		Object *team1_character = new Object(rand()%500-250,rand()%400, TEAM1_CHARACTER);
+		team1_character->team = 1;
+		Characters[characternum] = team1_character;
+		characternum++;
+		team1_charactertime = 0.f;
 		}
-	}
+		
 }
 
-//클릭하는 위치에 캐릭터를 만들어주는 함수 
+//클릭하는 위치에 team2캐릭터를 만들어주는 함수 
 void ScenceMgr::Clickmake(int x, int y)
 {	
-	if (m_objects[obnum] == NULL) {
-		Object* ob = new Object((float)x - 250, (float)-(y - 400), OBJECT_CHARACTER);
-		m_objects[obnum] = ob;
-		obnum++;
+	if (Characters[characternum] == NULL && team2_charactertime > 7.0f) {
+		if ((float)-(y - 400) < 0) {
+			Object* team2_character = new Object((float)x - 250, (float)-(y - 400), TEAM2_CHARACTER);
+			team2_character->team = 2;
+			Characters[characternum] = team2_character;
+			characternum++;
+			team2_charactertime = 0;
+		}
 	}
 	
 }
@@ -144,19 +198,28 @@ void ScenceMgr::RenderObject()
 	//캐릭터 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (m_objects[i] != NULL)
+		if (Characters[i] != NULL)
 		{
-			m_renderer->DrawSolidRect(m_objects[i]->Getx(), m_objects[i]->Gety(),
-				m_objects[i]->Getz(), m_objects[i]->Getsize(),
-				m_objects[i]->Getr(), m_objects[i]->Getg(),
-				m_objects[i]->Getb(), m_objects[i]->Geta());
+			m_renderer->DrawSolidRect(Characters[i]->Getx(), Characters[i]->Gety(),
+				Characters[i]->Getz(), Characters[i]->Getsize(),
+				Characters[i]->Getr(), Characters[i]->Getg(),
+				Characters[i]->Getb(), Characters[i]->Geta());
 		}
 	}
 
-	//빌딩 렌더 
-	if (Building != NULL) {
-		m_renderer->DrawTexturedRect(Building->Getx(), Building->Gety(), Building->Getz(), Building->Getsize(),
-			Building->Getr(), Building->Getg(), Building->Getb(), Building->Geta(),m_texCharacter);
+	//TEAM1 빌딩 렌더 
+	for (int i = 0; i < 3; i++) {
+		if (Building[i] != NULL) {
+			m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
+				Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding1);
+		}
+	}
+	//TEAM2 빌딩 렌더 
+	for (int i = 3; i < 6; i++) {
+		if (Building[i] != NULL) {
+			m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
+				Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding2);
+		}
 	}
 
 	//총알 렌더 
@@ -177,61 +240,46 @@ void ScenceMgr::RenderObject()
 
 //충돌테스트 함수 
 void ScenceMgr::CollisionTest()
-{
-	//캐릭터간의 충돌 
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+{	
+	//빌딩과 캐릭터의 충돌	
+	for (int i = 0; i < 6; i++)
 	{
-		bool check = false;
-		if (m_objects[i] != NULL) {
-			for (int j = 0; j < MAX_OBJECT_COUNT; j++)
-			{
-				if (i == j)
-					continue;
-				if (m_objects[j] != NULL) {
-					if ((m_objects[i]->Getx() - m_objects[i]->Getsize() / 2.f) < (m_objects[j]->Getx() + m_objects[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Getx() + m_objects[i]->Getsize() / 2.f) > (m_objects[j]->Getx() - m_objects[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() - m_objects[i]->Getsize() / 2.f) < (m_objects[j]->Gety() + m_objects[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() + m_objects[i]->Getsize() / 2.f) > (m_objects[j]->Gety() - m_objects[j]->Getsize() / 2.f))
-						check = true;
+		for (int j = 0; j < MAX_OBJECT_COUNT; j++) {
+			if (Building[i] != NULL && Characters[j] != NULL) {
+				if (CollisionCheck(Building[i], Characters[j]) && Building[i]->team != Characters[j]->team) {
+					Building[i]->Life -= Characters[j]->Life;
+					Characters[j]->Life = 0;
 				}
-			}
-			if (check) {
-				m_objects[i]->r = 1, m_objects[i]->g = 0, m_objects[i]->b = 0, m_objects[i]->a = 1;
-			}
-			else {
-				m_objects[i]->r = 1, m_objects[i]->g = 1, m_objects[i]->b = 1, m_objects[i]->a = 1;
 			}
 
 		}
 	}
-	//빌딩과 캐릭터의 충돌	
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
-	{
-		if (Building != NULL && m_objects[i] != NULL) {
-			if ((Building->Getx() - Building->Getsize() / 2.f) < (m_objects[i]->Getx() + m_objects[i]->Getsize() / 2.f) &&
-				(Building->Getx() + Building->Getsize() / 2.f) > (m_objects[i]->Getx() - m_objects[i]->Getsize() / 2.f) &&
-				(Building->Gety() - Building->Getsize() / 2.f) < (m_objects[i]->Gety() + m_objects[i]->Getsize() / 2.f) &&
-				(Building->Gety() + Building->Getsize() / 2.f) > (m_objects[i]->Gety() - m_objects[i]->Getsize() / 2.f))
-			{
-				Building->Life -= m_objects[i]->Life;
-				m_objects[i]->Life = 0;
-				cout << "Building HP:" << Building->Life << endl;
+
+	//Building과 bullet의 충돌 체크 
+	for (int i = 0; i < 6; i++) {
+		if (Building[i] != NULL) {
+			for (int j = 0; j < bulletnum; j++) {
+				if (Bullets[j] != NULL) {
+					if ( CollisionCheck(Building[i],Bullets[j]) && (Building[i]->team != Bullets[j]->team)) {
+						Building[i]->Life -= Bullets[j]->Life;
+						Bullets[j]->Life = 0;
+						cout << "빌딩" << i+1 << "의 life=" << Building[i]->Life << endl;
+					}
+				}
 			}
 		}
-
 	}
 	//총알과 캐릭터의 충돌 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (m_objects[i] != NULL) {
+		if (Characters[i] != NULL) {
 			for (int j = 0; j < bulletnum; j++)
 			{				
 				if (Bullets[j] != NULL) {
-					if ((m_objects[i]->Getx() - m_objects[i]->Getsize() / 2.f) < (Bullets[j]->Getx() + Bullets[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Getx() + m_objects[i]->Getsize() / 2.f) > (Bullets[j]->Getx() - Bullets[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() - m_objects[i]->Getsize() / 2.f) < (Bullets[j]->Gety() + Bullets[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() + m_objects[i]->Getsize() / 2.f) > (Bullets[j]->Gety() - Bullets[j]->Getsize() / 2.f))
-						m_objects[i]->Life -= Bullets[j]->Life;
+					if (CollisionCheck(Characters[i], Bullets[j]) && Characters[i]->team != Bullets[j]->team) {
+						Characters[i]->Life -= Bullets[j]->Life;
+						Bullets[j]->Life = 0;
+					}
 				}
 			}	
 		}
@@ -239,44 +287,52 @@ void ScenceMgr::CollisionTest()
 	//character와 arrow의 충돌 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (m_objects[i] != NULL) {
+		if (Characters[i] != NULL) {
 			for (int j = 0; j < arrownum; j++)
 			{
-				//arrow의 id와 캐릭터의 i가 같으면 continue
-				if (Arrows[j] != NULL && Arrows[j]->arrow_id == i)
-				{
-					continue;
-				}
-
 				if (Arrows[j] != NULL) {
-					if ((m_objects[i]->Getx() - m_objects[i]->Getsize() / 2.f) < (Arrows[j]->Getx() + Arrows[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Getx() + m_objects[i]->Getsize() / 2.f) > (Arrows[j]->Getx() - Arrows[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() - m_objects[i]->Getsize() / 2.f) < (Arrows[j]->Gety() + Arrows[j]->Getsize() / 2.f) &&
-						(m_objects[i]->Gety() + m_objects[i]->Getsize() / 2.f) > (Arrows[j]->Gety() - Arrows[j]->Getsize() / 2.f)) 
+					if (CollisionCheck(Characters[i],Arrows[j]) && Characters[i]->team != Arrows[j]->team)
 					{
-						m_objects[i]->Life -= Arrows[j]->Life;
+						Characters[i]->Life -= Arrows[j]->Life;
+						Arrows[j]->Life = 0;
 					}
 				
 				}
 			}
 		}
 	}
+	
 	//Building과 arrow의 충돌 
-	for (int i = 0; i < arrownum; i++)
+	for (int i = 0; i < 6; i++)
 	{
-		if (Building != NULL && Arrows[i] != NULL) {
-			if ((Building->Getx() - Building->Getsize() / 2.f) < (Arrows[i]->Getx() + Arrows[i]->Getsize() / 2.f) &&
-				(Building->Getx() + Building->Getsize() / 2.f) > (Arrows[i]->Getx() - Arrows[i]->Getsize() / 2.f) &&
-				(Building->Gety() - Building->Getsize() / 2.f) < (Arrows[i]->Gety() + Arrows[i]->Getsize() / 2.f) &&
-				(Building->Gety() + Building->Getsize() / 2.f) > (Arrows[i]->Gety() - Arrows[i]->Getsize() / 2.f))
-			{
-				Building->Life -= Arrows[i]->Life;
-				Arrows[i]->Life = 0;
-				cout << "Building HP:" << Building->Life << endl;
+		if (Building[i] != NULL) {
+			for (int j = 0; j < arrownum; j++) {
+				if (Arrows[j] != NULL) {
+					if (CollisionCheck(Building[i], Arrows[j]) && Building[i]->team != Arrows[j]->team) {
+						Building[i]->Life -= Arrows[j]->Life;
+						Arrows[j]->Life = 0;
+					}
+				}
 			}
 		}
-
 	}
 	
 }
 
+bool ScenceMgr::CollisionCheck(Object *a, Object *b) {
+	float left_a = a->Getx() - (a->Getsize() / 2.f);
+	float right_a = a->Getx() + (a->Getsize() / 2.f);
+	float top_a = a->Gety() + (a->Getsize() / 2.f);
+	float bottom_a = a->Gety() - (a->Getsize() / 2.f);
+	float left_b = b->Getx() - (b->Getsize() / 2.f);
+	float right_b = b->Getx() + (b->Getsize() / 2.f);
+	float top_b = b->Gety() + (b->Getsize() / 2.f);
+	float bottom_b = b->Gety() - (b->Getsize() / 2.f);
+
+	if (left_a > right_b) return false;
+	if (right_a < left_b) return false;
+	if (top_a < bottom_b) return false; 
+	if (bottom_a > top_b) return false;
+
+	return true;
+}
