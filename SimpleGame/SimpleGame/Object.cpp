@@ -6,7 +6,7 @@
 #include "ScenceMgr.h"
 using namespace std;
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life): arrow_id(0), arrow_time(0.f), team(0)
+Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life,float _level): arrow_id(0), arrow_time(0.f), team(0)
 {
 	
 	x = _x;
@@ -17,11 +17,13 @@ Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, fl
 	g = _g;
 	b = _b;
 	a = _a;
+	level = _level;
 	//0~1까지의 실수난수를 생성해서 0.5를 빼서 랜덤방향을 생성하고, 방향을 speed에 곱해준다.
 	xspeed = speed * (float)((rand() % 1000 + 1) * 0.001 - 0.5f);
 	yspeed = speed * (float)((rand() % 1000 + 1) * 0.001 - 0.5f);
 	Lifetime = 10000.0f;
 	Life = _Life;
+
 
 }
 
@@ -79,3 +81,11 @@ void Object::Update(float elaspedtime) {
 	Lifetime -= 0.5f;
 }
 
+void Object::bullet_arrow_Update(float elaspedtime)
+{
+	//elaspedtime을 second로 변환 
+	float second = elaspedtime * 0.001f;
+	this->x = x + xspeed * second;
+	this->y = y + yspeed * second;
+	Lifetime -= 0.5f;
+}

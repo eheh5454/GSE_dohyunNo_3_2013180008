@@ -8,15 +8,14 @@
 #define OBJECT_BULLET 0.f, 2.f, 1.f, 0.f, 0.f, 1.f, 600.f, 20.f
 #define OBJECT_ARROW 0.f, 2.f, 0.f, 1.f, 0.f, 1.f, 100.f, 10.f
 
-#define TEAM1_CHARACTER 0.f, 10.f, 1.f, 0.f, 0.f, 1.f, 300.f, 10.f 
-#define TEAM2_CHARACTER 0.f, 10.f, 0.f, 0.f, 1.f, 1.f, 300.f, 10.f 
-#define TEAM2_CHARACTER 0.f, 10.f, 0.f, 0.f, 1.f, 1.f, 300.f, 10.f 
-#define TEAM1_BUILDING 0.f, 100.f, 1.f, 1.f, 0.f, 0.f, 0.f, 500.f
-#define TEAM2_BUILDING 0.f, 100.f, 1.f, 1.f, 0.f, 0.f, 0.f, 500.f
-#define TEAM1_BULLET 0.f, 2.f, 1.f, 0.f, 0.f, 1.f, 600.f, 20.f
-#define TEAM2_BULLET 0.f, 2.f, 0.f, 0.f, 1.f, 1.f, 600.f, 20.f
-#define TEAM1_ARROW 0.f, 2.f, 0.5f, 0.2f, 0.7f, 1.f, 100.f, 10.f
-#define TEAM2_ARROW 0.f, 2.f, 1.f, 1.f, 0.f, 1.f, 100.f, 10.f
+#define TEAM1_CHARACTER 0.f, 30.f, 1.f, 0.f, 0.f, 1.f, 300.f, 100.f , 0.2f
+#define TEAM2_CHARACTER 0.f, 30.f, 0.f, 0.f, 1.f, 1.f, 300.f, 100.f , 0.2f
+#define TEAM1_BUILDING 0.f, 100.f, 1.f, 1.f, 1.f, 1.f, 0.f, 500.f, 0.1f
+#define TEAM2_BUILDING 0.f, 100.f, 1.f, 1.f, 1.f, 1.f, 0.f, 500.f, 0.1f
+#define TEAM1_BULLET 0.f, 4.f, 1.f, 0.f, 0.f, 1.f, 600.f, 20.f, 0.3f
+#define TEAM2_BULLET 0.f, 4.f, 0.f, 0.f, 1.f, 1.f, 600.f, 20.f, 0.3f
+#define TEAM1_ARROW 0.f, 4.f, 0.5f, 0.2f, 0.7f, 1.f, 100.f, 10.f, 0.3f
+#define TEAM2_ARROW 0.f, 4.f, 1.f, 1.f, 0.f, 1.f, 100.f, 10.f, 0.3f
 
 class ScenceMgr {
 private:

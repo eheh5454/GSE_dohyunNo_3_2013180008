@@ -71,8 +71,8 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	// arrow의 Life or Lifetime이 0이하가 되면 삭제해줌  
 	for (int i = 0; i < arrownum; i++) {
 		if (Arrows[i] != NULL) {
-			Arrows[i]->Update(elaspedtime);
-			if (Arrows[i]->Lifetime <= 0.1f || Arrows[i]->Life <= 0.f) {
+			Arrows[i]->bullet_arrow_Update(elaspedtime);
+			if (Arrows[i]->Lifetime <= 0.1f || Arrows[i]->Life <= 0.f || Arrows[i]->Getx() > 250 || Arrows[i]->Getx() < -250 || Arrows[i]->Gety() > 400 || Arrows[i]->Gety() < -400) {
 				delete Arrows[i];
 				Arrows[i] = NULL;
 			}
@@ -82,8 +82,8 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	//총알의 Life or Lifetime이 0이하가 되면 삭제해줌 
 	for (int i = 0; i < bulletnum; i++) {
 		if (Bullets[i] != NULL) {
-			Bullets[i]->Update(elaspedtime);
-			if (Bullets[i]->Lifetime <= 0.f || Bullets[i]->Life <= 0.f) {
+			Bullets[i]->bullet_arrow_Update(elaspedtime);
+			if (Bullets[i]->Lifetime <= 0.f || Bullets[i]->Life <= 0.f || Bullets[i]->Getx() > 250 || Bullets[i]->Getx() < -250 || Bullets[i]->Gety() > 400 || Bullets[i]->Gety() < -400) {
 				delete Bullets[i];
 				Bullets[i] = NULL;
 			}
@@ -125,6 +125,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 				Characters[i]->arrow_time = 0.f;
 			}
 			// arrow 개수가 MAX를 넘어가면 지워주면서 다시 생성 
+			/*
 			else if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] != NULL) {
 				delete Arrows[arrownum];
 				Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), OBJECT_ARROW);
@@ -135,6 +136,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 				arrownum++;
 				Characters[i]->arrow_time = 0.f;
 			}
+			*/
 		}
 	}
 }
@@ -143,7 +145,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 void ScenceMgr::MakeBullet(float elaspedtime) 
 {
 	bullettime += (elaspedtime * 0.001f);
-	if (bullettime >= 10.f) {
+	if (bullettime >= 5.f) {
 		for (int i = 0; i < 6; i++) {
 			if (Building[i] != NULL) {
 				if (i < 3) {
@@ -155,7 +157,7 @@ void ScenceMgr::MakeBullet(float elaspedtime)
 				else {
 					Object* bullet = new Object(Building[i]->Getx(), Building[i]->Gety(), TEAM2_BULLET);
 					Bullets[bulletnum] = bullet;
-					Bullets[bulletnum]->team = 2;
+					Bullets[bulletnum]->team = 2;					
 					bulletnum++;
 				}
 			}
@@ -206,7 +208,7 @@ void ScenceMgr::RenderObject()
 			m_renderer->DrawSolidRect(Characters[i]->Getx(), Characters[i]->Gety(),
 				Characters[i]->Getz(), Characters[i]->Getsize(),
 				Characters[i]->Getr(), Characters[i]->Getg(),
-				Characters[i]->Getb(), Characters[i]->Geta());
+				Characters[i]->Getb(), Characters[i]->Geta(), Characters[i]->level);
 		}
 	}
 
@@ -215,11 +217,11 @@ void ScenceMgr::RenderObject()
 		if (Building[i] != NULL) {
 			if (Building[i]->team == 1) {
 				m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
-					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding1);
+					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding1,Building[i]->level);
 			}
 			else if (Building[i]->team == 2) {
 				m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
-					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding2);
+					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding2, Building[i]->level);
 			}
 		}
 	}
@@ -228,16 +230,36 @@ void ScenceMgr::RenderObject()
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Bullets[i] != NULL) {
 			m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
-				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta());
+				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), Bullets[i]->level);
 		}
 	}
 	//Arrow 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Arrows[i] != NULL) {
 			m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
-				Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta());
+				Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(), Arrows[i]->level);
 		}
 	}
+	//Building Gauge 렌더
+	for (int i = 0; i < 6; i++) {
+		if (Building[i] != NULL) {
+			if (Building[i]->team == 1)
+				m_renderer->DrawSolidRectGauge(Building[i]->Getx(), Building[i]->Gety() + 60.f, 0.f, Building[i]->Getsize(), Building[i]->Getsize() / 10.f, 1.0f, 0.f, 0.f, 1.f, Building[i]->Life / 500.f, 0.1f);
+			else if(Building[i]->team == 2)
+				m_renderer->DrawSolidRectGauge(Building[i]->Getx(), Building[i]->Gety() + 60.f, 0.f, Building[i]->Getsize(), Building[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Building[i]->Life / 500.f, 0.1f);
+		}
+	}
+	//Character Gauge 렌더 
+	for (int i = 0; i < characternum; i++) {
+		if (Characters[i] != NULL) {
+			if (Characters[i]->team == 1)
+				m_renderer->DrawSolidRectGauge(Characters[i]->Getx(), Characters[i]->Gety() + 25.f, Characters[i]->Getz(),Characters[i]->Getsize(), Characters[i]->Getsize() / 10.f, 1.0f, 0.f, 0.f, 1.f, Characters[i]->Life / 100.f, 0.1f);
+			else if (Characters[i]->team == 2)
+				m_renderer->DrawSolidRectGauge(Characters[i]->Getx(), Characters[i]->Gety() + 25.f, Characters[i]->Getz(),Characters[i]->Getsize(), Characters[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Characters[i]->Life / 100.f, 0.1f);
+		}
+	}
+
+
 }
 
 //충돌테스트 함수 
@@ -251,6 +273,7 @@ void ScenceMgr::CollisionTest()
 				if (CollisionCheck(Building[i], Characters[j]) && Building[i]->team != Characters[j]->team) {
 					Building[i]->Life -= Characters[j]->Life;
 					Characters[j]->Life = 0;
+					cout << "빌딩" << i + 1 << "의 life=" << Building[i]->Life << endl;
 				}
 			}
 
@@ -313,6 +336,7 @@ void ScenceMgr::CollisionTest()
 					if (CollisionCheck(Building[i], Arrows[j]) && Building[i]->team != Arrows[j]->team) {
 						Building[i]->Life -= Arrows[j]->Life;
 						Arrows[j]->Life = 0;
+						cout << "빌딩" << i + 1 << "의 life=" << Building[i]->Life << endl;
 					}
 				}
 			}
