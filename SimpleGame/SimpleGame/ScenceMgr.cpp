@@ -139,11 +139,11 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 	}
 }
 
-//Building별로 1초당 Bullet을 생성하는 함수 
+//Building별로 10초당 Bullet을 생성하는 함수 
 void ScenceMgr::MakeBullet(float elaspedtime) 
 {
 	bullettime += (elaspedtime * 0.001f);
-	if (bullettime >= 1.f) {
+	if (bullettime >= 10.f) {
 		for (int i = 0; i < 6; i++) {
 			if (Building[i] != NULL) {
 				if (i < 3) {
