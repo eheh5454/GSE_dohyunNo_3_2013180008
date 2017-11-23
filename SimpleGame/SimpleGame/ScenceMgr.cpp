@@ -15,8 +15,8 @@ ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),
 	Object* building5 = new Object(0.f, -300.f, TEAM2_BUILDING);
 	Object* building6 = new Object(150.f, -300.f, TEAM2_BUILDING);
 
-	building1->team, building2->team, building3->team = 1;
-	building4->team, building5->team, building6->team = 2;
+	building1->team = 1, building2->team = 1, building3->team = 1;
+	building4->team = 2, building5->team = 2, building6->team = 2;
 
 	Building[0] = building1;
 	Building[1] = building2;
@@ -40,7 +40,8 @@ ScenceMgr::~ScenceMgr()
 //전체 오브젝트 업데이트 함수 
 void ScenceMgr::Update_AllObject(float elaspedtime)
 {   
-	
+	CollisionTest();
+
 	if (arrownum >= MAX_OBJECT_COUNT) {
 		arrownum = 0;
 	}
@@ -101,7 +102,7 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 		
 }
-//Arrow를 생성해주는 함수
+// character별로 3초마다 Arrow를 생성해주는 함수
 void ScenceMgr::MakeArrow(float elaspedtime)
 {	
 	for (int i = 0; i < characternum; i++) {
@@ -123,6 +124,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 				arrownum++;
 				Characters[i]->arrow_time = 0.f;
 			}
+			// arrow 개수가 MAX를 넘어가면 지워주면서 다시 생성 
 			else if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] != NULL) {
 				delete Arrows[arrownum];
 				Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), OBJECT_ARROW);
@@ -137,6 +139,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 	}
 }
 
+//Building별로 1초당 Bullet을 생성하는 함수 
 void ScenceMgr::MakeBullet(float elaspedtime) 
 {
 	bullettime += (elaspedtime * 0.001f);
@@ -194,7 +197,7 @@ void ScenceMgr::Clickmake(int x, int y)
 //렌더러 함수 
 void ScenceMgr::RenderObject()
 {
-	CollisionTest();
+	
 	//캐릭터 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
@@ -207,30 +210,29 @@ void ScenceMgr::RenderObject()
 		}
 	}
 
-	//TEAM1 빌딩 렌더 
-	for (int i = 0; i < 3; i++) {
+	//빌딩 렌더 
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Building[i] != NULL) {
-			m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
-				Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding1);
-		}
-	}
-	//TEAM2 빌딩 렌더 
-	for (int i = 3; i < 6; i++) {
-		if (Building[i] != NULL) {
-			m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
-				Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding2);
+			if (Building[i]->team == 1) {
+				m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
+					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding1);
+			}
+			else if (Building[i]->team == 2) {
+				m_renderer->DrawTexturedRect(Building[i]->Getx(), Building[i]->Gety(), Building[i]->Getz(), Building[i]->Getsize(),
+					Building[i]->Getr(), Building[i]->Getg(), Building[i]->Getb(), Building[i]->Geta(), m_texbuilding2);
+			}
 		}
 	}
 
 	//총알 렌더 
-	for (int i = 0; i < bulletnum; i++) {
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Bullets[i] != NULL) {
 			m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
 				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta());
 		}
 	}
 	//Arrow 렌더 
-	for (int i = 0; i < arrownum; i++) {
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Arrows[i] != NULL) {
 			m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
 				Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta());
@@ -244,7 +246,7 @@ void ScenceMgr::CollisionTest()
 	//빌딩과 캐릭터의 충돌	
 	for (int i = 0; i < 6; i++)
 	{
-		for (int j = 0; j < MAX_OBJECT_COUNT; j++) {
+		for (int j = 0; j < characternum; j++) {
 			if (Building[i] != NULL && Characters[j] != NULL) {
 				if (CollisionCheck(Building[i], Characters[j]) && Building[i]->team != Characters[j]->team) {
 					Building[i]->Life -= Characters[j]->Life;
@@ -270,7 +272,7 @@ void ScenceMgr::CollisionTest()
 		}
 	}
 	//총알과 캐릭터의 충돌 
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	for (int i = 0; i < characternum; i++)
 	{
 		if (Characters[i] != NULL) {
 			for (int j = 0; j < bulletnum; j++)
@@ -285,7 +287,7 @@ void ScenceMgr::CollisionTest()
 		}
 	 }
 	//character와 arrow의 충돌 
-	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
+	for (int i = 0; i < characternum; i++)
 	{
 		if (Characters[i] != NULL) {
 			for (int j = 0; j < arrownum; j++)
@@ -319,6 +321,7 @@ void ScenceMgr::CollisionTest()
 	
 }
 
+//충돌체크 함수 
 bool ScenceMgr::CollisionCheck(Object *a, Object *b) {
 	float left_a = a->Getx() - (a->Getsize() / 2.f);
 	float right_a = a->Getx() + (a->Getsize() / 2.f);
