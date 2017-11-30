@@ -3,18 +3,23 @@
 #include "Renderer.h"
 #include "Object.h"
 
-ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0)
+ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0), frame(0)
 {
 	m_renderer = new Renderer(width, height);
 	m_texbuilding1 = m_renderer->CreatePngTexture("./Resource/Building.png");
 	m_texbuilding2 = m_renderer->CreatePngTexture("./Resource/agumon.png");
+	m_texbackground = m_renderer->CreatePngTexture("./Resource/background.png");
+	m_texcharacter = m_renderer->CreatePngTexture("./Resource/Eye_monster.png");
+	m_texparticle = m_renderer->CreatePngTexture("./Resource/particle.png");
+
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
 	Object* building3 = new Object(150.f, 300.f, TEAM1_BUILDING);
 	Object* building4 = new Object(-150.f, -300.f, TEAM2_BUILDING);
 	Object* building5 = new Object(0.f, -300.f, TEAM2_BUILDING);
 	Object* building6 = new Object(150.f, -300.f, TEAM2_BUILDING);
-
+	
+	
 	building1->team = 1, building2->team = 1, building3->team = 1;
 	building4->team = 2, building5->team = 2, building6->team = 2;
 
@@ -54,7 +59,16 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	MakeBullet(elaspedtime);
 
 	team2_charactertime += (elaspedtime * 0.001f);
+
+	time += (elaspedtime * 0.001f);
 	
+	
+	if (frame > 8.f) {
+		frame = 0.f;
+	}
+
+	frame += (elaspedtime * 0.001f);
+
 
 	//Ä³¸¯ÅÍÀÇ Life or LifetimeÀÌ 0ÀÌÇÏ°¡ µÇ¸é »èÁ¦ÇØÁÜ 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
@@ -199,16 +213,17 @@ void ScenceMgr::Clickmake(int x, int y)
 //·»´õ·¯ ÇÔ¼ö 
 void ScenceMgr::RenderObject()
 {
-	
+	//¹è°æÈ­¸é ·»´õ 
+	m_renderer->DrawTexturedRect(0.f,0.f,0.f,800.f,1.f,1.f,1.f,1.f,m_texbackground, 0.4f);
 	//Ä³¸¯ÅÍ ·»´õ 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
 		if (Characters[i] != NULL)
 		{
-			m_renderer->DrawSolidRect(Characters[i]->Getx(), Characters[i]->Gety(),
+			m_renderer->DrawTexturedRectSeq(Characters[i]->Getx(), Characters[i]->Gety(),
 				Characters[i]->Getz(), Characters[i]->Getsize(),
 				Characters[i]->Getr(), Characters[i]->Getg(),
-				Characters[i]->Getb(), Characters[i]->Geta(), Characters[i]->level);
+				Characters[i]->Getb(), Characters[i]->Geta(),m_texcharacter,(int)frame,0,8,1, Characters[i]->level);
 		}
 	}
 
@@ -229,8 +244,10 @@ void ScenceMgr::RenderObject()
 	//ÃÑ¾Ë ·»´õ 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Bullets[i] != NULL) {
-			m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
-				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), Bullets[i]->level);
+			m_renderer->DrawParticle(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
+				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), 1, 0, m_texparticle, time);
+			/*m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
+				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), Bullets[i]->level);*/
 		}
 	}
 	//Arrow ·»´õ 
