@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Object.h"
 
+
 ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0), frame(0)
 {
 	m_renderer = new Renderer(width, height);
@@ -18,7 +19,9 @@ ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),
 	Object* building4 = new Object(-150.f, -300.f, TEAM2_BUILDING);
 	Object* building5 = new Object(0.f, -300.f, TEAM2_BUILDING);
 	Object* building6 = new Object(150.f, -300.f, TEAM2_BUILDING);
-	
+	soundBG = m_sound->CreateSound("./Resource/BGM.mp3");
+	m_sound->PlaySoundW(soundBG, true, 20.f);
+
 	
 	building1->team = 1, building2->team = 1, building3->team = 1;
 	building4->team = 2, building5->team = 2, building6->team = 2;
@@ -276,7 +279,8 @@ void ScenceMgr::RenderObject()
 		}
 	}
 
-
+	//Text 렌더 
+	m_renderer->DrawTextW(-250.f, 380.f, GLUT_BITMAP_TIMES_ROMAN_24, 1.f, 1.f, 0.f, "Dohyun");
 }
 
 //충돌테스트 함수 
