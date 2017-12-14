@@ -38,7 +38,8 @@ private:
 	float arrowtime;
 	float team1_charactertime;
 	float team2_charactertime;
-	float frame;
+	float character_frame;
+	float elaspedsecond;
 
 
 public:

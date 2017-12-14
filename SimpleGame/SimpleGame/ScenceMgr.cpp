@@ -4,7 +4,7 @@
 #include "Object.h"
 
 
-ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0), frame(0)
+ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0), character_frame(0), elaspedsecond(0)
 {
 	m_renderer = new Renderer(width, height);
 	m_texbuilding1 = m_renderer->CreatePngTexture("./Resource/Building.png");
@@ -53,7 +53,7 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	if (arrownum >= MAX_OBJECT_COUNT) {
 		arrownum = 0;
 	}
-
+	elaspedsecond = elaspedtime * 0.001f;
 	
 	MakeArrow(elaspedtime);
 
@@ -61,16 +61,16 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 	MakeBullet(elaspedtime);
 
-	team2_charactertime += (elaspedtime * 0.001f);
+	team2_charactertime += elaspedsecond;
 
-	time += (elaspedtime * 0.001f);
+	time += elaspedsecond;
 	
 	
-	if (frame > 8.f) {
-		frame = 0.f;
+	if (character_frame > 8.f) {
+		character_frame = 0.f;
 	}
 
-	frame += (elaspedtime * 0.001f);
+	character_frame += elaspedsecond * 5.f;
 
 
 	//캐릭터의 Life or Lifetime이 0이하가 되면 삭제해줌 
@@ -129,7 +129,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 				if (Characters[i]->team == 1) {
 					Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), TEAM1_ARROW);
 					Arrow->team = Characters[i]->team;
-					Arrow->arrow_id = i;
+					Arrow->arrow_id = i; //arrow마다 id를 설정( arrow를 생성한 캐릭터와 충돌방지)
 					Arrows[arrownum] = Arrow;
 				}
 				else if (Characters[i]->team == 2) {
@@ -141,19 +141,6 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 				arrownum++;
 				Characters[i]->arrow_time = 0.f;
 			}
-			// arrow 개수가 MAX를 넘어가면 지워주면서 다시 생성 
-			/*
-			else if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] != NULL) {
-				delete Arrows[arrownum];
-				Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), OBJECT_ARROW);
-				// arrow마다 id를 설정해준다(arrow를 생성한 캐릭터와의 충돌방지) 
-				Arrow->arrow_id = i;
-				Arrow->team = Characters[i]->team;
-				Arrows[arrownum] = Arrow;
-				arrownum++;
-				Characters[i]->arrow_time = 0.f;
-			}
-			*/
 		}
 	}
 }
@@ -226,7 +213,7 @@ void ScenceMgr::RenderObject()
 			m_renderer->DrawTexturedRectSeq(Characters[i]->Getx(), Characters[i]->Gety(),
 				Characters[i]->Getz(), Characters[i]->Getsize(),
 				Characters[i]->Getr(), Characters[i]->Getg(),
-				Characters[i]->Getb(), Characters[i]->Geta(),m_texcharacter,(int)frame,0,8,1, Characters[i]->level);
+				Characters[i]->Getb(), Characters[i]->Geta(),m_texcharacter,(int)character_frame,0,8,1, Characters[i]->level);
 		}
 	}
 
@@ -249,8 +236,6 @@ void ScenceMgr::RenderObject()
 		if (Bullets[i] != NULL) {
 			m_renderer->DrawParticle(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
 				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), 1, 0, m_texparticle, time);
-			/*m_renderer->DrawSolidRect(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
-				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), Bullets[i]->level);*/
 		}
 	}
 	//Arrow 렌더 
