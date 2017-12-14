@@ -27,6 +27,7 @@ private:
 	GLuint m_texbackground;
 	GLuint m_texcharacter;
 	GLuint m_texparticle;
+	GLuint m_texsnow;
 	Sound* m_sound = new Sound();
 
 	int soundBG;
@@ -39,7 +40,7 @@ private:
 	float team1_charactertime;
 	float team2_charactertime;
 	float character_frame;
-	float elaspedsecond;
+	
 
 
 public:

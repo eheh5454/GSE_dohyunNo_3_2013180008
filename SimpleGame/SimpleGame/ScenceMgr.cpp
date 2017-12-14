@@ -4,7 +4,7 @@
 #include "Object.h"
 
 
-ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),bullettime(0),arrownum(0),team1_charactertime(0), character_frame(0), elaspedsecond(0)
+ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0.f),bullettime(0),arrownum(0),team1_charactertime(0), character_frame(0)
 {
 	m_renderer = new Renderer(width, height);
 	m_texbuilding1 = m_renderer->CreatePngTexture("./Resource/Building.png");
@@ -12,7 +12,8 @@ ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0),
 	m_texbackground = m_renderer->CreatePngTexture("./Resource/background.png");
 	m_texcharacter = m_renderer->CreatePngTexture("./Resource/Eye_monster.png");
 	m_texparticle = m_renderer->CreatePngTexture("./Resource/particle.png");
-
+	m_texsnow = m_renderer->CreatePngTexture("./Resource/snow.png");
+	
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
 	Object* building3 = new Object(150.f, 300.f, TEAM1_BUILDING);
@@ -53,7 +54,7 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 	if (arrownum >= MAX_OBJECT_COUNT) {
 		arrownum = 0;
 	}
-	elaspedsecond = elaspedtime * 0.001f;
+	
 	
 	MakeArrow(elaspedtime);
 
@@ -61,16 +62,16 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 	MakeBullet(elaspedtime);
 
-	team2_charactertime += elaspedsecond;
+	team2_charactertime += elaspedtime * 0.001f;
 
-	time += elaspedsecond;
+	time += elaspedtime * 0.001f;
 	
 	
 	if (character_frame > 8.f) {
 		character_frame = 0.f;
 	}
 
-	character_frame += elaspedsecond * 5.f;
+	character_frame += (elaspedtime * 0.001f) * 5.f;
 
 
 	//캐릭터의 Life or Lifetime이 0이하가 되면 삭제해줌 
@@ -189,7 +190,7 @@ void ScenceMgr::MakeCharacter(float elaspedtime)
 //클릭하는 위치에 team2캐릭터를 만들어주는 함수 
 void ScenceMgr::Clickmake(int x, int y)
 {	
-	if (Characters[characternum] == NULL && team2_charactertime > 7.0f) {
+	if (Characters[characternum] == NULL && team2_charactertime > 2.0f) {
 		if ((float)-(y - 400) < 0) {
 			Object* team2_character = new Object((float)x - 250, (float)-(y - 400), TEAM2_CHARACTER);
 			team2_character->team = 2;
@@ -234,8 +235,8 @@ void ScenceMgr::RenderObject()
 	//총알 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Bullets[i] != NULL) {
-			m_renderer->DrawParticle(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
-				Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), 1, 0, m_texparticle, time);
+				m_renderer->DrawParticle(Bullets[i]->Getx(), Bullets[i]->Gety(), Bullets[i]->Getz(),
+					Bullets[i]->Getsize(), Bullets[i]->Getr(), Bullets[i]->Getg(), Bullets[i]->Getb(), Bullets[i]->Geta(), -(Bullets[i]->xspeed*0.01f), -(Bullets[i]->yspeed*0.01f), m_texparticle, Bullets[i]->particletime, 0.1f);
 		}
 	}
 	//Arrow 렌더 
@@ -263,6 +264,8 @@ void ScenceMgr::RenderObject()
 				m_renderer->DrawSolidRectGauge(Characters[i]->Getx(), Characters[i]->Gety() + 25.f, Characters[i]->Getz(),Characters[i]->Getsize(), Characters[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Characters[i]->Life / 100.f, 0.1f);
 		}
 	}
+
+	m_renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, m_texsnow, time, 0.01);
 
 	//Text 렌더 
 	m_renderer->DrawTextW(-250.f, 380.f, GLUT_BITMAP_TIMES_ROMAN_24, 1.f, 1.f, 0.f, "Dohyun");

@@ -6,7 +6,7 @@
 #include "ScenceMgr.h"
 using namespace std;
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life,float _level): arrow_id(0), arrow_time(0.f), team(0)
+Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a,float speed, float _Life,float _level): arrow_id(0), arrow_time(0.f), team(0), particletime(0)
 {
 	
 	x = _x;
@@ -23,6 +23,7 @@ Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, fl
 	yspeed = speed * (float)((rand() % 1000 + 1) * 0.001 - 0.5f);
 	Lifetime = 10000.0f;
 	Life = _Life;
+
 
 
 }
@@ -57,10 +58,8 @@ float Object::Geta() {
 
 
 void Object::Update(float elaspedtime) {
-	//elaspedtime을 second로 변환 
-	float second = elaspedtime * 0.001f;
-	this->x = x + xspeed * second;
-    this->y = y + yspeed * second;
+	this->x = x + xspeed * (elaspedtime * 0.001f);
+    this->y = y + yspeed * (elaspedtime * 0.001f);
 
 	if (x > 250)
 	{
@@ -85,6 +84,7 @@ void Object::bullet_arrow_Update(float elaspedtime)
 {
 	//elaspedtime을 second로 변환 
 	float second = elaspedtime * 0.001f;
+	particletime += second;
 	this->x = x + xspeed * second;
 	this->y = y + yspeed * second;
 	Lifetime -= 0.5f;
