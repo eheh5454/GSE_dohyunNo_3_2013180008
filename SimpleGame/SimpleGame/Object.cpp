@@ -58,12 +58,12 @@ float Object::Geta() {
 
 void Object::Update(float elaspedtime) {
 	if (teer == 1 && type == "agumon" && evolutiontime > 10.f) {
-		Life += 100.f;
+		Life += 50.f;
 		teer = 2;
 		
 	}
 	if (teer == 2 && evolutiontime > 20.f){
-		Life += 100.f;
+		Life += 50.f;
 		teer = 3;
 		
 	}

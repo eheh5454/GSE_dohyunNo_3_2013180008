@@ -21,6 +21,7 @@ ScenceMgr::ScenceMgr(int width,int height):allynum(0),bulletnum(0),time(0.f),bul
 	m_texkoromon_arrow = m_renderer->CreatePngTexture("./Resource/koromon_arrow.png");
 	m_texalien = m_renderer->CreatePngTexture("./Resource/Alien.png");
 	m_texmonster_arrow = m_renderer->CreatePngTexture("./Resource/monster_arrow.png");
+	m_texagumon_arrow = m_renderer->CreatePngTexture("./Resource/agumon_arrow.png");
 
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
@@ -148,7 +149,12 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 			if (Dizimons[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
 				Object* Arrow = new Object(Dizimons[i]->Getx(), Dizimons[i]->Gety(), TEAM2_ARROW);
 				Arrow->team = Dizimons[i]->team;
-				Arrow->Settype("koromon_arrow");
+				if (Dizimons[i]->Gettype().compare("agumon") == 0) {
+					Arrow->Settype("agumon_arrow");
+				}
+				else {
+					Arrow->Settype("koromon_arrow");
+				}
 				Arrows[arrownum] = Arrow;
 				arrownum++;
 				Dizimons[i]->arrow_time = 0.f;
@@ -335,6 +341,11 @@ void ScenceMgr::RenderObject()
 				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
 					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(),m_texkoromon_arrow, Arrows[i]->level);
 			}
+			else if (Arrows[i]->Gettype().compare("agumon_arrow") == 0)
+			{
+				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
+					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(), m_texagumon_arrow, Arrows[i]->level);
+			}
 			else if (Arrows[i]->Gettype().compare("monster_arrow") == 0)
 			{
 				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
@@ -362,10 +373,10 @@ void ScenceMgr::RenderObject()
 				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 100.f, 0.1f);
 			}
 			if (Dizimons[i]->teer == 2) {
-				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 200.f, 0.1f);
+				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 150.f, 0.1f);
 			}
 			if (Dizimons[i]->teer == 3) {
-				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 300.f, 0.1f);
+				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 200.f, 0.1f);
 			}
 		}
 	}
