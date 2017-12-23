@@ -4,15 +4,21 @@
 #include "Object.h"
 
 
-ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0.f),bullettime(0),arrownum(0),team1_charactertime(0), character_frame(0)
+ScenceMgr::ScenceMgr(int width,int height):allynum(0),bulletnum(0),time(0.f),bullettime(0),arrownum(0),eyemonster_time(0), character_frame(0), enermynum(0), koromon_time(0)
 {
 	m_renderer = new Renderer(width, height);
 	m_texbuilding1 = m_renderer->CreatePngTexture("./Resource/Building.png");
-	m_texbuilding2 = m_renderer->CreatePngTexture("./Resource/agumon.png");
+	m_texbuilding2 = m_renderer->CreatePngTexture("./Resource/Egg.png");
 	m_texbackground = m_renderer->CreatePngTexture("./Resource/background.png");
-	m_texcharacter = m_renderer->CreatePngTexture("./Resource/Eye_monster.png");
+	m_texeyemonster = m_renderer->CreatePngTexture("./Resource/Eye_monster.png");
+	m_texagumon = m_renderer->CreatePngTexture("./Resource/agumon.png");
 	m_texparticle = m_renderer->CreatePngTexture("./Resource/particle.png");
-	m_texsnow = m_renderer->CreatePngTexture("./Resource/snow.png");
+	m_texstar = m_renderer->CreatePngTexture("./Resource/star.png");
+	m_texgreymon = m_renderer->CreatePngTexture("./Resource/greymon.png");
+	m_texmetalgreymon = m_renderer->CreatePngTexture("./Resource/metalgreymon.png");
+	m_texevolution = m_renderer->CreatePngTexture("./Resource/evolution.png");
+	m_texkoromon = m_renderer->CreatePngTexture("./Resource/koromon.png");
+
 	
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
@@ -23,7 +29,6 @@ ScenceMgr::ScenceMgr(int width,int height):characternum(0),bulletnum(0),time(0.f
 	soundBG = m_sound->CreateSound("./Resource/BGM.mp3");
 	m_sound->PlaySoundW(soundBG, true, 20.f);
 
-	
 	building1->team = 1, building2->team = 1, building3->team = 1;
 	building4->team = 2, building5->team = 2, building6->team = 2;
 
@@ -49,7 +54,7 @@ ScenceMgr::~ScenceMgr()
 //전체 오브젝트 업데이트 함수 
 void ScenceMgr::Update_AllObject(float elaspedtime)
 {   
-	CollisionTest();
+    CollisionTest();
 
 	if (arrownum >= MAX_OBJECT_COUNT) {
 		arrownum = 0;
@@ -62,10 +67,9 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 	MakeBullet(elaspedtime);
 
-	team2_charactertime += elaspedtime * 0.001f;
+	agumon_time += elaspedtime * 0.001f;
 
 	time += elaspedtime * 0.001f;
-	
 	
 	if (character_frame > 8.f) {
 		character_frame = 0.f;
@@ -76,11 +80,23 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 
 	//캐릭터의 Life or Lifetime이 0이하가 되면 삭제해줌 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
-		if (Characters[i] != NULL) {
-			Characters[i]->Update(elaspedtime);
-			if (Characters[i]->Lifetime <= 0.f || Characters[i]->Life <= 0.f) {
-				delete Characters[i];
-				Characters[i] = NULL;
+		if (Dizimons[i] != NULL) {
+			Dizimons[i]->Update(elaspedtime);
+			if (Dizimons[i]->Lifetime <= 0.f || Dizimons[i]->Life <= 0.f) {
+				delete Dizimons[i];
+				Dizimons[i] = NULL;
+
+			}
+		}
+	}
+
+	//적군의 Life or Lifetime이 0이하가 되면 삭제해줌 
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
+		if (Enermys[i] != NULL) {
+			Enermys[i]->Update(elaspedtime);
+			if (Enermys[i]->Lifetime <= 0.f || Enermys[i]->Life <= 0.f) {
+				delete Enermys[i];
+				Enermys[i] = NULL;
 
 			}
 		}
@@ -123,25 +139,32 @@ void ScenceMgr::Update_AllObject(float elaspedtime)
 // character별로 3초마다 Arrow를 생성해주는 함수
 void ScenceMgr::MakeArrow(float elaspedtime)
 {	
-	for (int i = 0; i < characternum; i++) {
-		if (Characters[i] != NULL) {
-			Characters[i]->arrow_time += (elaspedtime * 0.001f);
-			if (Characters[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
-				if (Characters[i]->team == 1) {
-					Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), TEAM1_ARROW);
-					Arrow->team = Characters[i]->team;
-					Arrow->arrow_id = i; //arrow마다 id를 설정( arrow를 생성한 캐릭터와 충돌방지)
-					Arrows[arrownum] = Arrow;
-				}
-				else if (Characters[i]->team == 2) {
-					Object* Arrow = new Object(Characters[i]->Getx(), Characters[i]->Gety(), TEAM2_ARROW);
-					Arrow->team = Characters[i]->team;
-					Arrow->arrow_id = i;
-					Arrows[arrownum] = Arrow;
-				}				
+	//아군의 arrow 생성
+	for (int i = 0; i < allynum; i++) {
+		if (Dizimons[i] != NULL) {
+			Dizimons[i]->arrow_time += (elaspedtime * 0.001f);
+			if (Dizimons[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
+				Object* Arrow = new Object(Dizimons[i]->Getx(), Dizimons[i]->Gety(), TEAM2_ARROW);
+				Arrow->team = Dizimons[i]->team;
+				Arrow->arrow_id = i;
+				Arrows[arrownum] = Arrow;
 				arrownum++;
-				Characters[i]->arrow_time = 0.f;
+				Dizimons[i]->arrow_time = 0.f;
 			}
+		}
+	}
+	//적군의 arrow 생성 
+	for (int i = 0; i < enermynum; i++) {
+		if (Enermys[i] != NULL) {
+			Enermys[i]->arrow_time += (elaspedtime * 0.001f);
+			if (Enermys[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
+				Object* Arrow = new Object(Enermys[i]->Getx(), Enermys[i]->Gety(), TEAM1_ARROW);
+				Arrow->team = Enermys[i]->team;
+				Arrow->arrow_id = i; //arrow마다 id를 설정( arrow를 생성한 캐릭터와 충돌방지)
+				Arrows[arrownum] = Arrow;
+				arrownum++;
+				Enermys[i]->arrow_time = 0.f;
+			}	
 		}
 	}
 }
@@ -173,33 +196,45 @@ void ScenceMgr::MakeBullet(float elaspedtime)
 
 }
 	
-//team1 캐릭터 5초마다 생성해주는 함수 
+//일정 주기로 유닛 생성 
 void ScenceMgr::MakeCharacter(float elaspedtime)
 {
-	team1_charactertime += elaspedtime * 0.001f;
-	if (team1_charactertime > 5.f) {
-		Object *team1_character = new Object(rand()%500-250,rand()%400, TEAM1_CHARACTER);
-		team1_character->team = 1;
-		Characters[characternum] = team1_character;
-		characternum++;
-		team1_charactertime = 0.f;
+	eyemonster_time += elaspedtime * 0.001f;
+	koromon_time += elaspedtime * 0.001f;
+	if (eyemonster_time > 5.f) {
+		Object *eyemonster = new Object(rand()%500-250,rand()%400, EYE_MONSTER);
+		eyemonster->team = 1;
+		eyemonster->Settype("Eye");
+		Enermys[enermynum] = eyemonster;
+		enermynum++;
+		eyemonster_time = 0.f;
 		}
-		
+
+	if (koromon_time > 5.f) {
+		Object *koromon = new Object(rand() % 500 - 250, rand() % 400 - 400, KOROMON);
+		koromon->team = 2;
+		koromon->Settype("koromon");
+		Dizimons[allynum] = koromon;
+		allynum++;
+		koromon_time = 0.f;
+	}
 }
 
-//클릭하는 위치에 team2캐릭터를 만들어주는 함수 
+//클릭하는 위치에 아군유닛 생성 
 void ScenceMgr::Clickmake(int x, int y)
 {	
-	if (Characters[characternum] == NULL && team2_charactertime > 2.0f) {
+	if (Dizimons[allynum] == NULL && agumon_time > 2.0f) {
 		if ((float)-(y - 400) < 0) {
-			Object* team2_character = new Object((float)x - 250, (float)-(y - 400), TEAM2_CHARACTER);
-			team2_character->team = 2;
-			Characters[characternum] = team2_character;
-			characternum++;
-			team2_charactertime = 0;
+			Object* agumon = new Object((float)x - 250, (float)-(y - 400), AGUMON);
+			agumon->team = 2;
+			agumon->Settype("agumon");
+			agumon->xspeed = 0;
+			agumon->yspeed = 50.f;
+			Dizimons[allynum] = agumon;
+			allynum++;
+			agumon_time = 0.f;
 		}
-	}
-	
+	}	
 }
 //렌더러 함수 
 void ScenceMgr::RenderObject()
@@ -209,12 +244,45 @@ void ScenceMgr::RenderObject()
 	//캐릭터 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (Characters[i] != NULL)
+		if (Dizimons[i] != NULL)
 		{
-			m_renderer->DrawTexturedRectSeq(Characters[i]->Getx(), Characters[i]->Gety(),
-				Characters[i]->Getz(), Characters[i]->Getsize(),
-				Characters[i]->Getr(), Characters[i]->Getg(),
-				Characters[i]->Getb(), Characters[i]->Geta(),m_texcharacter,(int)character_frame,0,8,1, Characters[i]->level);
+			//agumon 렌더, evolution time에 따라 진화		
+			if (Dizimons[i]->evolutiontime > 20.f && Dizimons[i]->Gettype() == "agumon") {
+				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
+					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
+					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
+					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texmetalgreymon, (int)character_frame, 0, 4, 1, Dizimons[i]->level);
+			}
+			else if (Dizimons[i]->evolutiontime > 10.f && Dizimons[i]->Gettype() == "agumon") {
+				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
+					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
+					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
+					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texgreymon, (int)character_frame, 0, 6, 1, Dizimons[i]->level);
+			}
+			else if (Dizimons[i]->Gettype() == "agumon"){
+				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
+					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
+					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
+					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texagumon, (int)character_frame, 0, 6, 1, Dizimons[i]->level);
+			}
+			else if (Dizimons[i]->Gettype() == "koromon") {
+				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
+					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
+					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
+					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texkoromon, (int)character_frame, 0, 4, 1, Dizimons[i]->level);
+			}
+		}
+	}
+	
+	//적군 eyemonster 
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
+		if (Enermys[i] != NULL) {
+			if (Enermys[i]->Gettype() == "Eye") {
+				m_renderer->DrawTexturedRectSeq(Enermys[i]->Getx(), Enermys[i]->Gety(),
+					Enermys[i]->Getz(), Enermys[i]->Getsize(),
+					Enermys[i]->Getr(), Enermys[i]->Getg(),
+					Enermys[i]->Getb(), Enermys[i]->Geta(), m_texeyemonster, (int)character_frame, 0, 8, 1, Enermys[i]->level);
+			}
 		}
 	}
 
@@ -255,33 +323,47 @@ void ScenceMgr::RenderObject()
 				m_renderer->DrawSolidRectGauge(Building[i]->Getx(), Building[i]->Gety() + 60.f, 0.f, Building[i]->Getsize(), Building[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Building[i]->Life / 500.f, 0.1f);
 		}
 	}
-	//Character Gauge 렌더 
-	for (int i = 0; i < characternum; i++) {
-		if (Characters[i] != NULL) {
-			if (Characters[i]->team == 1)
-				m_renderer->DrawSolidRectGauge(Characters[i]->Getx(), Characters[i]->Gety() + 25.f, Characters[i]->Getz(),Characters[i]->Getsize(), Characters[i]->Getsize() / 10.f, 1.0f, 0.f, 0.f, 1.f, Characters[i]->Life / 100.f, 0.1f);
-			else if (Characters[i]->team == 2)
-				m_renderer->DrawSolidRectGauge(Characters[i]->Getx(), Characters[i]->Gety() + 25.f, Characters[i]->Getz(),Characters[i]->Getsize(), Characters[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Characters[i]->Life / 100.f, 0.1f);
+	//agumon Gauge 렌더 
+	for (int i = 0; i < allynum; i++) {
+		if (Dizimons[i] != NULL) {
+			if (Dizimons[i]->teer == 1) {
+				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 100.f, 0.1f);
+			}
+			if (Dizimons[i]->teer == 2) {
+				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 200.f, 0.1f);
+			}
+			if (Dizimons[i]->teer == 3) {
+				m_renderer->DrawSolidRectGauge(Dizimons[i]->Getx(), Dizimons[i]->Gety() + 25.f, Dizimons[i]->Getz(), Dizimons[i]->Getsize(), Dizimons[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Dizimons[i]->Life / 300.f, 0.1f);
+			}
 		}
 	}
 
-	m_renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, m_texsnow, time, 0.01);
+	//eyemonster Gauge 렌더
+	for (int i = 0; i < enermynum; i++) {
+		if (Enermys[i] != NULL) {
+			m_renderer->DrawSolidRectGauge(Enermys[i]->Getx(), Enermys[i]->Gety() + 25.f, Enermys[i]->Getz(), Enermys[i]->Getsize(), Enermys[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Enermys[i]->Life / 100.f, 0.1f);
+		}
+	}
+
+	//별똥별 떨어지는 효과 
+	m_renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, m_texstar, time, 0.01);
 
 	//Text 렌더 
 	m_renderer->DrawTextW(-250.f, 380.f, GLUT_BITMAP_TIMES_ROMAN_24, 1.f, 1.f, 0.f, "Dohyun");
+
 }
 
 //충돌테스트 함수 
 void ScenceMgr::CollisionTest()
 {	
-	//빌딩과 캐릭터의 충돌	
+	//빌딩과 적군의 충돌	
 	for (int i = 0; i < 6; i++)
 	{
-		for (int j = 0; j < characternum; j++) {
-			if (Building[i] != NULL && Characters[j] != NULL) {
-				if (CollisionCheck(Building[i], Characters[j]) && Building[i]->team != Characters[j]->team) {
-					Building[i]->Life -= Characters[j]->Life;
-					Characters[j]->Life = 0;
+		for (int j = 0; j < enermynum; j++) {
+			if (Building[i] != NULL && Enermys[j] != NULL) {
+				if (CollisionCheck(Building[i], Enermys[j]) && Building[i]->team != Enermys[j]->team) {
+					Building[i]->Life -= Enermys[j]->Life;
+					Enermys[j]->Life = 0;
 					cout << "빌딩" << i + 1 << "의 life=" << Building[i]->Life << endl;
 				}
 			}
@@ -303,34 +385,65 @@ void ScenceMgr::CollisionTest()
 			}
 		}
 	}
+	
 	//총알과 캐릭터의 충돌 
-	for (int i = 0; i < characternum; i++)
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (Characters[i] != NULL) {
+		//아군의 충돌
+		if (Dizimons[i] != NULL) {
 			for (int j = 0; j < bulletnum; j++)
 			{				
 				if (Bullets[j] != NULL) {
-					if (CollisionCheck(Characters[i], Bullets[j]) && Characters[i]->team != Bullets[j]->team) {
-						Characters[i]->Life -= Bullets[j]->Life;
+					if (CollisionCheck(Dizimons[i], Bullets[j]) && Dizimons[i]->team != Bullets[j]->team) {
+						Dizimons[i]->Life -= Bullets[j]->Life;
 						Bullets[j]->Life = 0;
 					}
 				}
 			}	
 		}
+		//적군의 충돌 
+		if (Enermys[i] != NULL) {
+			for (int j = 0; j < bulletnum; j++)
+			{
+				if (Bullets[j] != NULL) {
+					if (CollisionCheck(Enermys[i], Bullets[j]) && Enermys[i]->team != Bullets[j]->team) {
+						Enermys[i]->Life -= Bullets[j]->Life;
+						Bullets[j]->Life = 0;
+					}
+				}
+			}
+		}
 	 }
+
+	
 	//character와 arrow의 충돌 
-	for (int i = 0; i < characternum; i++)
+	for (int i = 0; i < MAX_OBJECT_COUNT; i++)
 	{
-		if (Characters[i] != NULL) {
+		//아군의 충돌 
+		if (Dizimons[i] != NULL) {
 			for (int j = 0; j < arrownum; j++)
 			{
 				if (Arrows[j] != NULL) {
-					if (CollisionCheck(Characters[i],Arrows[j]) && Characters[i]->team != Arrows[j]->team)
+					if (CollisionCheck(Dizimons[i],Arrows[j]) && Dizimons[i]->team != Arrows[j]->team)
 					{
-						Characters[i]->Life -= Arrows[j]->Life;
+						Dizimons[i]->Life -= Arrows[j]->Life;
 						Arrows[j]->Life = 0;
 					}
 				
+				}
+			}
+		}
+		//적군의 충돌 
+		if (Enermys[i] != NULL) {
+			for (int j = 0; j < arrownum; j++)
+			{
+				if (Arrows[j] != NULL) {
+					if (CollisionCheck(Enermys[i], Arrows[j]) && Enermys[i]->team != Arrows[j]->team)
+					{
+						Enermys[i]->Life -= Arrows[j]->Life;
+						Arrows[j]->Life = 0;
+					}
+
 				}
 			}
 		}
