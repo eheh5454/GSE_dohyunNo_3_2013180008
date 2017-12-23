@@ -18,7 +18,8 @@ ScenceMgr::ScenceMgr(int width,int height):allynum(0),bulletnum(0),time(0.f),bul
 	m_texmetalgreymon = m_renderer->CreatePngTexture("./Resource/metalgreymon.png");
 	m_texevolution = m_renderer->CreatePngTexture("./Resource/evolution.png");
 	m_texkoromon = m_renderer->CreatePngTexture("./Resource/koromon.png");
-
+	m_texkoromon_arrow = m_renderer->CreatePngTexture("./Resource/koromon_arrow.png");
+	m_texalien = m_renderer->CreatePngTexture("./Resource/Alien.png");
 	
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
@@ -146,7 +147,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 			if (Dizimons[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
 				Object* Arrow = new Object(Dizimons[i]->Getx(), Dizimons[i]->Gety(), TEAM2_ARROW);
 				Arrow->team = Dizimons[i]->team;
-				Arrow->arrow_id = i;
+				Arrow->Settype("koromon_arrow");
 				Arrows[arrownum] = Arrow;
 				arrownum++;
 				Dizimons[i]->arrow_time = 0.f;
@@ -160,7 +161,6 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 			if (Enermys[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
 				Object* Arrow = new Object(Enermys[i]->Getx(), Enermys[i]->Gety(), TEAM1_ARROW);
 				Arrow->team = Enermys[i]->team;
-				Arrow->arrow_id = i; //arrow마다 id를 설정( arrow를 생성한 캐릭터와 충돌방지)
 				Arrows[arrownum] = Arrow;
 				arrownum++;
 				Enermys[i]->arrow_time = 0.f;
@@ -201,6 +201,7 @@ void ScenceMgr::MakeCharacter(float elaspedtime)
 {
 	eyemonster_time += elaspedtime * 0.001f;
 	koromon_time += elaspedtime * 0.001f;
+	alien_time += elaspedtime * 0.001f;
 	if (eyemonster_time > 5.f) {
 		Object *eyemonster = new Object(rand()%500-250,rand()%400, EYE_MONSTER);
 		eyemonster->team = 1;
@@ -210,6 +211,15 @@ void ScenceMgr::MakeCharacter(float elaspedtime)
 		eyemonster_time = 0.f;
 		}
 
+	if (alien_time > 5.f) {
+		Object *alien = new Object(rand() % 500 - 250, rand() % 400, ALIEN);
+		alien->team = 1;
+		alien->Settype("Alien");
+		Enermys[enermynum] = alien;
+		enermynum++;
+		alien_time = 0.f;
+	}
+
 	if (koromon_time > 5.f) {
 		Object *koromon = new Object(rand() % 500 - 250, rand() % 400 - 400, KOROMON);
 		koromon->team = 2;
@@ -218,12 +228,14 @@ void ScenceMgr::MakeCharacter(float elaspedtime)
 		allynum++;
 		koromon_time = 0.f;
 	}
+
+	
 }
 
 //클릭하는 위치에 아군유닛 생성 
 void ScenceMgr::Clickmake(int x, int y)
 {	
-	if (Dizimons[allynum] == NULL && agumon_time > 2.0f) {
+	if (Dizimons[allynum] == NULL && agumon_time > 5.0f) {
 		if ((float)-(y - 400) < 0) {
 			Object* agumon = new Object((float)x - 250, (float)-(y - 400), AGUMON);
 			agumon->team = 2;
@@ -247,25 +259,25 @@ void ScenceMgr::RenderObject()
 		if (Dizimons[i] != NULL)
 		{
 			//agumon 렌더, evolution time에 따라 진화		
-			if (Dizimons[i]->evolutiontime > 20.f && Dizimons[i]->Gettype() == "agumon") {
+			if (Dizimons[i]->evolutiontime > 20.f && Dizimons[i]->Gettype().compare("agumon")==0) {
 				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
 					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
 					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
 					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texmetalgreymon, (int)character_frame, 0, 4, 1, Dizimons[i]->level);
 			}
-			else if (Dizimons[i]->evolutiontime > 10.f && Dizimons[i]->Gettype() == "agumon") {
+			else if (Dizimons[i]->evolutiontime > 10.f && Dizimons[i]->Gettype().compare("agumon")==0) {
 				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
 					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
 					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
 					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texgreymon, (int)character_frame, 0, 6, 1, Dizimons[i]->level);
 			}
-			else if (Dizimons[i]->Gettype() == "agumon"){
+			else if (Dizimons[i]->Gettype().compare("agumon")==0){
 				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
 					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
 					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
 					Dizimons[i]->Getb(), Dizimons[i]->Geta(), m_texagumon, (int)character_frame, 0, 6, 1, Dizimons[i]->level);
 			}
-			else if (Dizimons[i]->Gettype() == "koromon") {
+			else if (Dizimons[i]->Gettype().compare("koromon")==0) {
 				m_renderer->DrawTexturedRectSeq(Dizimons[i]->Getx(), Dizimons[i]->Gety(),
 					Dizimons[i]->Getz(), Dizimons[i]->Getsize(),
 					Dizimons[i]->Getr(), Dizimons[i]->Getg(),
@@ -274,14 +286,20 @@ void ScenceMgr::RenderObject()
 		}
 	}
 	
-	//적군 eyemonster 
+	//적군 eyemonster 렌더
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Enermys[i] != NULL) {
-			if (Enermys[i]->Gettype() == "Eye") {
+			if (Enermys[i]->Gettype().compare("Eye")==0) {
 				m_renderer->DrawTexturedRectSeq(Enermys[i]->Getx(), Enermys[i]->Gety(),
 					Enermys[i]->Getz(), Enermys[i]->Getsize(),
 					Enermys[i]->Getr(), Enermys[i]->Getg(),
 					Enermys[i]->Getb(), Enermys[i]->Geta(), m_texeyemonster, (int)character_frame, 0, 8, 1, Enermys[i]->level);
+			}
+			if (Enermys[i]->Gettype().compare("Alien") == 0) {
+				m_renderer->DrawTexturedRectSeq(Enermys[i]->Getx(), Enermys[i]->Gety(),
+					Enermys[i]->Getz(), Enermys[i]->Getsize(),
+					Enermys[i]->Getr(), Enermys[i]->Getg(),
+					Enermys[i]->Getb(), Enermys[i]->Geta(), m_texalien, (int)character_frame, 0, 8, 1, Enermys[i]->level);
 			}
 		}
 	}
@@ -310,8 +328,15 @@ void ScenceMgr::RenderObject()
 	//Arrow 렌더 
 	for (int i = 0; i < MAX_OBJECT_COUNT; i++) {
 		if (Arrows[i] != NULL) {
-			m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
-				Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(), Arrows[i]->level);
+			if (Arrows[i]->Gettype().compare("koromon_arrow") == 0)
+			{
+				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
+					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(),m_texkoromon_arrow, Arrows[i]->level);
+			}
+			else {
+				m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
+					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(), Arrows[i]->level);
+			}
 		}
 	}
 	//Building Gauge 렌더
@@ -341,8 +366,9 @@ void ScenceMgr::RenderObject()
 	//eyemonster Gauge 렌더
 	for (int i = 0; i < enermynum; i++) {
 		if (Enermys[i] != NULL) {
-			m_renderer->DrawSolidRectGauge(Enermys[i]->Getx(), Enermys[i]->Gety() + 25.f, Enermys[i]->Getz(), Enermys[i]->Getsize(), Enermys[i]->Getsize() / 10.f, 0.0f, 0.f, 1.f, 1.f, Enermys[i]->Life / 100.f, 0.1f);
+			m_renderer->DrawSolidRectGauge(Enermys[i]->Getx(), Enermys[i]->Gety() + 25.f, Enermys[i]->Getz(), Enermys[i]->Getsize(), Enermys[i]->Getsize() / 10.f, 1.0f, 0.f, 0.f, 1.f, Enermys[i]->Life / 100.f, 0.1f);
 		}
+
 	}
 
 	//별똥별 떨어지는 효과 
