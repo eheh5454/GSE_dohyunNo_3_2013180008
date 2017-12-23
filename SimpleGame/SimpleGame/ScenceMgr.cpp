@@ -20,7 +20,8 @@ ScenceMgr::ScenceMgr(int width,int height):allynum(0),bulletnum(0),time(0.f),bul
 	m_texkoromon = m_renderer->CreatePngTexture("./Resource/koromon.png");
 	m_texkoromon_arrow = m_renderer->CreatePngTexture("./Resource/koromon_arrow.png");
 	m_texalien = m_renderer->CreatePngTexture("./Resource/Alien.png");
-	
+	m_texmonster_arrow = m_renderer->CreatePngTexture("./Resource/monster_arrow.png");
+
 	Object* building1 = new Object(-150.f, 300.f, TEAM1_BUILDING);
 	Object* building2 = new Object(0.f, 300.f, TEAM1_BUILDING);
 	Object* building3 = new Object(150.f, 300.f, TEAM1_BUILDING);
@@ -161,6 +162,7 @@ void ScenceMgr::MakeArrow(float elaspedtime)
 			if (Enermys[i]->arrow_time > 3.f && Arrows[arrownum] == NULL) {
 				Object* Arrow = new Object(Enermys[i]->Getx(), Enermys[i]->Gety(), TEAM1_ARROW);
 				Arrow->team = Enermys[i]->team;
+				Arrow->Settype("monster_arrow");
 				Arrows[arrownum] = Arrow;
 				arrownum++;
 				Enermys[i]->arrow_time = 0.f;
@@ -211,7 +213,7 @@ void ScenceMgr::MakeCharacter(float elaspedtime)
 		eyemonster_time = 0.f;
 		}
 
-	if (alien_time > 5.f) {
+	if (alien_time > 30.f) {
 		Object *alien = new Object(rand() % 500 - 250, rand() % 400, ALIEN);
 		alien->team = 1;
 		alien->Settype("Alien");
@@ -332,6 +334,11 @@ void ScenceMgr::RenderObject()
 			{
 				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
 					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(),m_texkoromon_arrow, Arrows[i]->level);
+			}
+			else if (Arrows[i]->Gettype().compare("monster_arrow") == 0)
+			{
+				m_renderer->DrawTexturedRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
+					Arrows[i]->Getsize(), Arrows[i]->Getr(), Arrows[i]->Getg(), Arrows[i]->Getb(), Arrows[i]->Geta(), m_texmonster_arrow, Arrows[i]->level);
 			}
 			else {
 				m_renderer->DrawSolidRect(Arrows[i]->Getx(), Arrows[i]->Gety(), Arrows[i]->Getz(),
